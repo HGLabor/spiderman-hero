@@ -2,6 +2,7 @@ package gg.norisk.heroes.spiderman
 
 import gg.norisk.heroes.spiderman.movement.LeadRenderer
 import gg.norisk.heroes.spiderman.movement.PendulumMovement
+import gg.norisk.heroes.spiderman.movement.PullMovement
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.registry.EntityRendererRegistry
 import gg.norisk.heroes.spiderman.registry.ItemRegistry
@@ -24,6 +25,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         EntityRegistry.init()
         PendulumMovement.initialize()
         LeadRenderer.init()
+        PullMovement.init()
 
         ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted {
             if (FabricLoader.getInstance().isDevelopmentEnvironment) {
