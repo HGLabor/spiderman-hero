@@ -1,16 +1,15 @@
 package gg.norisk.heroes.spiderman.movement
 
+import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.minecraft.block.Blocks
+import net.minecraft.entity.SpawnReason
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.silkmc.silk.commands.command
 import net.silkmc.silk.core.entity.modifyVelocity
 import net.silkmc.silk.core.text.literal
 import java.util.*
-import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -48,19 +47,29 @@ object PendulumMovement : ServerTickEvents.EndTick {
                     player.sendMessage("Stopped swinging.".literal)
                 } else {
                     // Setze einen neuen Ankerpunkt und Startzeit für den Spieler
-                    val swingAnchor = player.pos.add(0.0, 50.0, 0.0)
+                    val swingAnchor = player.blockPos.add(0, 10, 0)
+                    val world = player.serverWorld
 
-                    player.world.setBlockState(
+                    /*player.world.setBlockState(
                         BlockPos(
-                            swingAnchor.x.toInt(),
-                            swingAnchor.y.toInt(),
-                            swingAnchor.z.toInt()
+                            swingAnchor.x,
+                            swingAnchor.y,
+                            swingAnchor.z
                         ),
                         Blocks.BEDROCK.defaultState
-                    )
+                    )*/
+
+                    val web = EntityRegistry.WEB.spawn(
+                        world,
+                        swingAnchor,
+                        SpawnReason.COMMAND
+                    ) ?: return@runs
+                    web.setNoGravity(false)
+                    web.customName = "Web".literal
+                    web.isCustomNameVisible = true
 
                     val swingData =
-                        PlayerSwingData(swingAnchor = swingAnchor, startTime = System.currentTimeMillis() / 1000.0)
+                        PlayerSwingData(swingAnchor = web.pos, startTime = System.currentTimeMillis() / 1000.0)
                     playerSwingDataMap[player.uuid] = swingData
                     player.sendMessage("Started swinging.".literal)
                 }
@@ -73,31 +82,33 @@ object PendulumMovement : ServerTickEvents.EndTick {
 
     private fun performSwingMotion(player: ServerPlayerEntity) {
         val swingData = playerSwingDataMap[player.uuid] ?: return
-        val currentTime = System.currentTimeMillis() / 1000.0 - swingData.startTime
-        val angle = startAngle * cos(sqrt(gravity / ropeLength) * currentTime)
+        val currentPosition = player.pos
+        val currentDistanceVec = currentPosition.subtract(swingData.swingAnchor)
+        val currentDistance = currentDistanceVec.length()
 
-        // Berechne die zukünftige Position basierend auf dem aktuellen Zeitpunkt + deltaTime
-        val futureTime = currentTime + deltaTime
-        val futureAngle = startAngle * cos(sqrt(gravity / ropeLength) * futureTime)
+        // Berechne, wie weit der Spieler über die "Seillänge" hinaus ist
+        val overLength = currentDistance - ropeLength
 
-        // Berechne aktuelle und zukünftige Positionen relativ zum Ankerpunkt
-        val currentPosition = Vec3d(sin(angle) * ropeLength, swingData.swingAnchor.y - (cos(angle) * ropeLength), 0.0)
-        val futurePosition = Vec3d(sin(futureAngle) * ropeLength, swingData.swingAnchor.y - (cos(futureAngle) * ropeLength), 0.0)
+        // Stärkere Rückführkraft, wenn der Spieler über die Seillänge hinaus ist
+        val kBase = 0.05 // Grundfederkonstante
+        val kOverLengthMultiplier = 3.0 // Multiplikator für die Federkonstante über die Seillänge hinaus
+        val k = if (overLength > 0) kBase * kOverLengthMultiplier else kBase
 
-        // Berechne die erforderliche Geschwindigkeit
-        var velocity = futurePosition.subtract(currentPosition).multiply(1 / deltaTime)
+        // Die "Federkraft", die auf den Spieler ausgeübt wird, abhängig vom Abstand zum Ankerpunkt
+        val forceMagnitude = overLength * k
 
-        // Einführung einer Aufwärmphase, um die initiale Beschleunigung zu kontrollieren
-        val warmupTime = 5.0 // 5 Sekunden Aufwärmphase
-        val dampingFactor = if (currentTime < warmupTime) {
-            // Reduziere die Geschwindigkeit in der Aufwärmphase
-            (currentTime / warmupTime) * 0.5
-        } else {
-            0.5
-        }
+        // Berechne die Richtung der Kraft
+        val forceDirection = currentDistanceVec.normalize().negate()
 
-        velocity = velocity.multiply(dampingFactor)
-        player.modifyVelocity(velocity)
+        // Berechne die neue Geschwindigkeit basierend auf der "Federkraft"
+        var newVelocity = forceDirection.multiply(forceMagnitude)
+
+        // Einfache Dämpfung, um die Bewegung realistischer zu machen
+        val dampingFactor = 0.1
+        newVelocity = newVelocity.multiply(dampingFactor)
+
+        // Anwenden der berechneten Geschwindigkeit
+        player.modifyVelocity(newVelocity)
     }
 
 

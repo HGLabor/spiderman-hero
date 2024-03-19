@@ -1,6 +1,9 @@
 package gg.norisk.heroes.spiderman
 
+import gg.norisk.heroes.spiderman.movement.LeadRenderer
 import gg.norisk.heroes.spiderman.movement.PendulumMovement
+import gg.norisk.heroes.spiderman.registry.EntityRegistry
+import gg.norisk.heroes.spiderman.registry.EntityRendererRegistry
 import gg.norisk.heroes.spiderman.registry.ItemRegistry
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.DedicatedServerModInitializer
@@ -18,7 +21,9 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
     override fun onInitialize() {
         // Common initialization
         ItemRegistry.init()
+        EntityRegistry.init()
         PendulumMovement.initialize()
+        LeadRenderer.init()
 
         ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted {
             if (FabricLoader.getInstance().isDevelopmentEnvironment) {
@@ -32,6 +37,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
 
     override fun onInitializeClient() {
         // Client initialization
+        EntityRendererRegistry.init()
     }
 
     override fun onInitializeServer() {
