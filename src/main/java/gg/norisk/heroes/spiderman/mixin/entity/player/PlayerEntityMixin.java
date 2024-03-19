@@ -23,6 +23,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Spiderma
     @Inject(method = "initDataTracker", at = @At("TAIL"))
     private void initDataTrackerInjection(CallbackInfo ci) {
         this.dataTracker.startTracking(SpidermanPlayerKt.getSpidermanAnchorPointTracker(), Optional.empty());
+        this.dataTracker.startTracking(SpidermanPlayerKt.getGravityTracker(), (float) LivingEntity.GRAVITY);
+        this.dataTracker.startTracking(SpidermanPlayerKt.getSwingingTracker(), false);
         this.dataTracker.startTracking(SpidermanPlayerKt.getLeashEntityIdTracker(), OptionalInt.empty());
     }
 }

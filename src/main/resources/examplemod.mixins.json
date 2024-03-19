@@ -6,10 +6,12 @@
     "defaultRequire": 0
   },
   "mixins": [
+    "entity.LivingEntityMixin",
     "entity.player.PlayerEntityMixin"
   ],
   "client": [
     "client.MouseMixin",
+    "client.network.ClientPlayerEntityMixin",
     "client.render.WorldRendererMixin",
     "client.render.entity.FlyingItemEntityRendererMixin",
     "client.render.entity.MobEntityRendererMixin",
