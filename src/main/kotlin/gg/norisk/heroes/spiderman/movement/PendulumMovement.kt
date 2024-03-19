@@ -107,9 +107,9 @@ object PendulumMovement : ServerTickEvents.EndTick {
 
         // Seitliche Bewegung
         if (isPressingLeft) {
-            swingData.lateralMultiplier = Math.max(swingData.lateralMultiplier - 0.01, -1.0) // Limit nach links
+            swingData.lateralMultiplier = Math.max(swingData.lateralMultiplier - 1, -30.0) // Limit nach links
         } else if (isPressingRight) {
-            swingData.lateralMultiplier = Math.min(swingData.lateralMultiplier + 0.01, 1.0) // Limit nach rechts
+            swingData.lateralMultiplier = Math.min(swingData.lateralMultiplier + 1, 30.0) // Limit nach rechts
         } else {
             // Auto-Zentrierung oder Dämpfung der seitlichen Bewegung, wenn keine seitliche Eingabe erfolgt
             swingData.lateralMultiplier *= 0.9
@@ -127,14 +127,16 @@ object PendulumMovement : ServerTickEvents.EndTick {
         val currentTime = System.currentTimeMillis() / 1000.0 - swingData.startTime
         val angle = startAngle * cos(sqrt(gravity / ropeLength) * currentTime)
 
+
         // Berechne die zukünftige Position basierend auf dem aktuellen Zeitpunkt + deltaTime
         val futureTime = currentTime + deltaTime
         val futureAngle = startAngle * cos(sqrt(gravity / ropeLength) * futureTime)
 
         // Berechne aktuelle und zukünftige Positionen relativ zum Ankerpunkt
-        val currentPosition = Vec3d(sin(angle) * ropeLength, swingData.swingAnchor.y - (cos(angle) * ropeLength), 0.0)
+        val currentPosition = Vec3d(0.0, swingData.swingAnchor.y - (cos(angle) * ropeLength), sin(angle) * ropeLength)
+        
         val futurePosition =
-            Vec3d(sin(futureAngle) * ropeLength, swingData.swingAnchor.y - (cos(futureAngle) * ropeLength), 0.0)
+            Vec3d(0.0, swingData.swingAnchor.y - (cos(futureAngle) * ropeLength), sin(futureAngle) * ropeLength)
 
         // Berechne die erforderliche Geschwindigkeit
         var velocity = futurePosition.subtract(currentPosition).multiply(1 / deltaTime)
@@ -149,11 +151,6 @@ object PendulumMovement : ServerTickEvents.EndTick {
             factor
         }
 
-        val playerYaw = player.yaw
-        val lateralDirection = Math.sin(Math.toRadians(playerYaw.toDouble()))
-        val forwardDirection = Math.cos(Math.toRadians(playerYaw.toDouble()))
-
-        velocity = velocity.add(Vec3d(swingData.lateralMultiplier, 0.0, 0.0)) // Hinzufügen der seitlichen Geschwindigkeit
         velocity = velocity.multiply(dampingFactor).multiply(swingData.forwardMultiplier)
         player.modifyVelocity(velocity)
     }

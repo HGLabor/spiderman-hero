@@ -25,7 +25,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         if (this.isCamera()) {
             if (SpidermanPlayerKt.isSwinging(this)) {
                 this.forwardSpeed = 0;
-                this.sidewaysSpeed = 0;
+                this.sidewaysSpeed = 0f;
             }
         }
     }
