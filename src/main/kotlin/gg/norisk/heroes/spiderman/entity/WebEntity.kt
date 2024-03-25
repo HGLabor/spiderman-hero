@@ -1,8 +1,13 @@
 package gg.norisk.heroes.spiderman.entity
 
+import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
+import gg.norisk.heroes.spiderman.grapple.GrapplingHookPhysicsController
+import gg.norisk.heroes.spiderman.grapple.RopeSegmentHandler
 import gg.norisk.heroes.spiderman.movement.PullMovement
 import gg.norisk.heroes.spiderman.player.gravity
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
+import gg.norisk.heroes.spiderman.util.Vec
+import net.minecraft.client.MinecraftClient
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.LivingEntity
@@ -16,23 +21,39 @@ import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import net.silkmc.silk.core.entity.modifyVelocity
+import net.silkmc.silk.core.text.literal
 import java.util.*
 
 
 class WebEntity : ThrownItemEntity {
-    var isCollided = false
-    var length = 30
     var originPos: Vec3d = pos
     var isDummy = false
+    var ropeLength: Double = 30.0
+    var taut: Double = 1.0
+    val segmentHandler: RopeSegmentHandler = RopeSegmentHandler(
+        this,
+        Vec.positionVec(this),
+        Vec.positionVec(this)
+    )
 
     companion object {
         val OWNER =
             DataTracker.registerData(WebEntity::class.java, TrackedDataHandlerRegistry.OPTIONAL_UUID)
+        val COLLIDED =
+            DataTracker.registerData(WebEntity::class.java, TrackedDataHandlerRegistry.BOOLEAN)
     }
 
     init {
         ignoreCameraFrustum = true
     }
+
+    var isCollided: Boolean
+        get() {
+            return this.dataTracker.get(COLLIDED)
+        }
+        set(value) {
+            this.dataTracker.set(COLLIDED, value)
+        }
 
     var ownerId: UUID?
         get() {
@@ -56,6 +77,7 @@ class WebEntity : ThrownItemEntity {
     override fun initDataTracker() {
         super.initDataTracker()
         this.dataTracker.startTracking(OWNER, Optional.empty())
+        this.dataTracker.startTracking(COLLIDED, false)
     }
 
     override fun getOwner(): Entity? {
@@ -72,17 +94,39 @@ class WebEntity : ThrownItemEntity {
     }
 
     override fun tick() {
-        if (world.isClient) return
-        if (isDummy) return
+        val player = owner as? PlayerEntity? ?: return
+
+        if (world.isClient) {
+            player.sendMessage("RopeLength: $ropeLength".literal)
+        }
+
+        //handleHookPhysics()
+
+        if (world.isClient && isCollided) {
+            if (owner == MinecraftClient.getInstance().player && GrappleModUtils.controller == null) {
+                owner?.sendMessage("Creating Controller".literal)
+                GrappleModUtils.controller = GrapplingHookPhysicsController(this.id, owner!!.id, this.world)
+            }
+
+            if (!this.isAlive) {
+                GrappleModUtils.controller = null
+            }
+        }
 
         if (!isCollided) {
             super.tick()
         }
 
-        if (!world.isClient && isCollided) {
-            val player = owner as? PlayerEntity? ?: return
+        if (this.pos.distanceTo(originPos) >= ropeLength && !world.isClient) {
+            this.modifyVelocity(this.velocity.multiply(0.8))
+        }
 
-            applySwingMotion(player, world, this.pos)
+        if (world.isClient) return
+        if (isDummy) return
+
+        if (!world.isClient && isCollided) {
+
+            /*applySwingMotion(player, world, this.pos)
 
             if (PullMovement.isPulling.contains(player.uuid)) {
                 val direction = this.pos.subtract(player.pos).normalize()
@@ -93,16 +137,12 @@ class WebEntity : ThrownItemEntity {
                     1.5
                 }
                 player.modifyVelocity(direction.multiply(speed))
-            }
-        }
-
-        if (this.pos.distanceTo(originPos) >= length && !world.isClient) {
-            this.modifyVelocity(this.velocity.multiply(0.8))
+            }*/
         }
     }
 
     override fun getGravity(): Float {
-        if (this.pos.distanceTo(originPos) >= length && !world.isClient) {
+        if (this.pos.distanceTo(originPos) >= ropeLength) {
             return super.getGravity() * 2
         }
         return super.getGravity()
@@ -110,6 +150,78 @@ class WebEntity : ThrownItemEntity {
 
     override fun getDefaultItem(): Item {
         return Items.COBWEB
+    }
+
+    private fun handleHookPhysics() {
+        if (segmentHandler.hookPastBend(this.ropeLength)) {
+            val farthest = segmentHandler.farthest
+            //this.serverAttach(segmentHandler.getBendBlock(1), farthest, null)
+        }
+
+        //if (!this.customization.get(BLOCK_PHASE_ROPE.get())) {
+        if (!false) {
+            segmentHandler.update(
+                Vec.positionVec(this), Vec.positionVec(this.owner).add(
+                    Vec(
+                        0.0,
+                        this.owner!!.standingEyeHeight.toDouble(), 0.0
+                    )
+                ), this.ropeLength, true
+            )
+
+            /* if (this.customization.get(STICKY_ROPE.get())) {
+                 val segments = segmentHandler.getSegments()
+
+                 if (segments.size > 2) {
+                     val bendnumber = segments.size - 2
+                     val closest = segments[bendnumber]
+                     val blockpos: BlockPos = segmentHandler.getBendBlock(bendnumber)
+
+                     for (i in 1..bendnumber) segmentHandler.removeSegment(1)
+
+                     this.serverAttach(blockpos, closest, null)
+                 }
+             }*/
+        } /*else {
+            segmentHandler.updatePos(
+                Vec.positionVec(this), Vec.positionVec(this.shootingEntity).add(
+                    Vec(
+                        0,
+                        this.shootingEntity.getEyeHeight(), 0
+                    )
+                ), this.ropeLength
+            )
+        }*/
+
+        val farthest = segmentHandler.farthest
+        val distToFarthest = segmentHandler.distToFarthest
+
+        val ropevec = Vec.positionVec(this).sub(farthest)
+        val d = ropevec.length()
+
+        /*if (this.customization.get(HOOK_REEL_IN_ON_SNEAK.get()) && this.owner?.isSneaking == true) {
+            val newdist = d + distToFarthest - 0.4
+            if (newdist > 1 && newdist <= this.customization.get(MAX_ROPE_LENGTH.get())) {
+                this.ropeLength = newdist
+            }
+        }*/
+
+
+        /*if (d + distToFarthest > this.ropeLength) {
+            var motion = Vec.motionVec(this)
+
+            if (motion.dot(ropevec) > 0) {
+                motion = motion.removeAlong(ropevec)
+            }
+
+            //this.setVelocityActually(motion.x, motion.y, motion.z)
+            this.modifyVelocity(motion.x, motion.y, motion.z)
+
+            ropevec.mutableSetMagnitude(this.ropeLength - distToFarthest)
+            val newpos = ropevec.add(farthest)
+
+            this.setPos(newpos.x, newpos.y, newpos.z)
+        }*/
     }
 
     fun applySwingMotion(player: PlayerEntity, world: World, anchorPoint: Vec3d) {

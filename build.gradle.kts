@@ -4,6 +4,7 @@ val silkVersion = "1.10.3"
 plugins {
     kotlin("jvm") version "1.9.21"
     id("fabric-loom") version "1.4-SNAPSHOT"
+    java
 }
 
 group = "org.example"

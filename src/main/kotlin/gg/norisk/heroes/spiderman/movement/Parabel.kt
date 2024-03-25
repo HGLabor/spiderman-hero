@@ -129,32 +129,8 @@ object Parabel : ClientTickEvents.EndTick {
                 parabola.origin.z + offset.z
             )
 
-            val rotated = rotatePoint(parabola.origin.x, parabola.origin.z, 45.0, Point(pos.x, pos.z))
-
-            world.addParticle(ParticleTypes.HAPPY_VILLAGER, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0)
-            world.addParticle(ParticleTypes.HEART, rotated.x, rotated.y, pos.y, 0.0, 0.0, 0.0)
+            world.addParticle(ParticleTypes.HEART, pos.x, pos.y, pos.z, 0.0, 0.0, 0.0)
         }
-    }
-
-    data class Point(var x: Double, var y: Double)
-
-    fun rotatePoint(cx: Double, cy: Double, angle: Double, p: Point): Point {
-        val s = sin(angle)
-        val c = cos(angle)
-
-        // Punkt zum Ursprung verschieben
-        p.x -= cx
-        p.y -= cy
-
-        // Punkt drehen
-        val xnew = p.x * c - p.y * s
-        val ynew = p.x * s + p.y * c
-
-        // Punkt zurückverschieben
-        p.x = xnew + cx
-        p.y = ynew + cy
-
-        return p
     }
 
     override fun onEndTick(client: MinecraftClient) {

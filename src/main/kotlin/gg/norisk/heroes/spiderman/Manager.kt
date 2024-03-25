@@ -1,5 +1,7 @@
 package gg.norisk.heroes.spiderman
 
+import gg.norisk.heroes.spiderman.grapple.GrappleKey
+import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
 import gg.norisk.heroes.spiderman.movement.LeadRenderer
 import gg.norisk.heroes.spiderman.movement.Parabel
 import gg.norisk.heroes.spiderman.movement.PendulumMovement
@@ -42,6 +44,8 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
     override fun onInitializeClient() {
         // Client initialization
         EntityRendererRegistry.init()
+        GrappleKey.registerAll()
+        GrappleModUtils.init()
     }
 
     override fun onInitializeServer() {
