@@ -1,5 +1,6 @@
 package gg.norisk.heroes.spiderman.grapple
 
+import gg.norisk.heroes.spiderman.Manager.toId
 import gg.norisk.heroes.spiderman.event.Events
 import gg.norisk.heroes.spiderman.util.Vec
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -9,6 +10,8 @@ import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.HitResult
 import net.minecraft.world.RaycastContext
 import net.minecraft.world.World
+import net.silkmc.silk.core.text.literal
+import net.silkmc.silk.network.packet.c2sPacket
 
 /*
 Full Credits to https://github.com/yyon/grapplemod
@@ -37,11 +40,30 @@ object GrappleModUtils {
         return false
     }
 
+    val webEntityDiscardPacket = c2sPacket<Int>("web-entity-discard-packet".toId())
+
     var controller: GrapplingHookPhysicsController? = null
+    private var lastJumpPressTime = 0L
+    private const val doublePressThreshold = 500L
 
     fun init() {
         ClientTickEvents.END_CLIENT_TICK.register {
             controller?.doClientTick()
+        }
+
+        //Double Press Key Logic maybe move?
+        Events.keyEvent.listen {
+            //TODO maybe resetten wenn action == 2 also gedrückt halten
+            if (it.client.options.jumpKey.matchesKey(it.key, it.scanCode) && it.action == 1) {
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastJumpPressTime < doublePressThreshold) {
+                    // Taste wurde zweimal schnell hintereinander gedrückt
+                    // Füge hier die Aktion ein, die ausgeführt werden soll
+                    //it.client.player?.sendMessage("Doppelklick erkannt!".literal)
+                    controller?.doJump = true
+                }
+                lastJumpPressTime = currentTime
+            }
         }
 
         Events.afterTickInputEvent.listen {
@@ -51,6 +73,7 @@ object GrappleModUtils {
                     it.input.movementForward,
                     it.input.sneaking
                 )
+                it.input.sneaking = false
                 it.input.jumping = false
                 it.input.pressingBack = false
                 it.input.pressingForward = false

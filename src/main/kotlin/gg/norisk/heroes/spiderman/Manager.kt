@@ -1,5 +1,6 @@
 package gg.norisk.heroes.spiderman
 
+import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.grapple.GrappleKey
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
 import gg.norisk.heroes.spiderman.movement.LeadRenderer
@@ -30,6 +31,8 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         LeadRenderer.init()
         PullMovement.init()
         Parabel.init()
+
+        WebEntity.initServer()
 
         ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted {
             if (FabricLoader.getInstance().isDevelopmentEnvironment) {

@@ -16,7 +16,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
-import net.silkmc.silk.core.entity.MovementExtensionsKt;
 
 import java.util.HashSet;
 
@@ -37,7 +36,7 @@ public class GrapplingHookPhysicsController {
     private final HashSet<WebEntity> grapplehookEntities = new HashSet<>();
     private final HashSet<Integer> grapplehookEntityIds = new HashSet<>();
 
-    private boolean isControllerActive = true;
+    public boolean isControllerActive = true;
 
     protected Vec motion;
 
@@ -45,6 +44,7 @@ public class GrapplingHookPhysicsController {
     protected double playerStrafe = 0;
     protected boolean playerJump = false;
     protected boolean playerSneak = false;
+    public boolean doJump = false;
     protected Vec playerMovementUnrotated = new Vec(0, 0, 0);
     protected Vec playerMovement = new Vec(0, 0, 0);
 
@@ -105,7 +105,10 @@ public class GrapplingHookPhysicsController {
     }
 
     public void disable() {
-        entity.sendMessage(Text.of("Removing..."));
+        //entity.sendMessage(Text.of("Removing..."));
+        for (Integer grapplehookEntityId : grapplehookEntityIds) {
+            GrappleModUtils.INSTANCE.getWebEntityDiscardPacket().send(grapplehookEntityId);
+        }
         GrappleModUtils.INSTANCE.setController(null);
         // Error'ed controllers should just be removed with no extra
         // conntrollers applied - they should be 'disabled' already.
@@ -145,7 +148,7 @@ public class GrapplingHookPhysicsController {
 
 
     public void doClientTick() {
-        entity.sendMessage(Text.of("Ticking..."));
+        //entity.sendMessage(Text.of("Ticking..."));
 
         if (!this.isControllerActive) {
             this.disable();
@@ -192,7 +195,7 @@ public class GrapplingHookPhysicsController {
     }
 
     public void receivePlayerMovementMessage(float strafe, float forward, boolean sneak) {
-        entity.sendMessage(Text.of("Strafe: " + strafe + " Forward " + forward + " Sneak " + sneak));
+        //entity.sendMessage(Text.of("Strafe: " + strafe + " Forward " + forward + " Sneak " + sneak));
         this.playerForward = forward;
         this.playerStrafe = strafe;
         this.playerSneak = sneak;
@@ -212,7 +215,7 @@ public class GrapplingHookPhysicsController {
             return;
         }
 
-        this.normalGround(false);
+        //this.normalGround(false);
         this.normalCollisions(false);
         this.applyAirFriction();
 
@@ -227,7 +230,6 @@ public class GrapplingHookPhysicsController {
         double minSphereVecDist = 99999;
         double jumpSpeed = 0;
         boolean close = false;
-        boolean doJump = false;
         boolean isClimbing = false;
 
         for (WebEntity hookEntity : this.grapplehookEntities) {
@@ -269,6 +271,9 @@ public class GrapplingHookPhysicsController {
 
             this.applyCalculatedTaut(playerToAnchorDist, hookEntity);
 
+            jumpSpeed = this.getJumpPower(entity, spherevec, hookEntity);
+
+
             // handle keyboard input (jumping and climbing)
             if (entity instanceof PlayerEntity player) {
                 boolean detachKeyDown = GrappleKey.DETACH.isPressed();
@@ -297,7 +302,7 @@ public class GrapplingHookPhysicsController {
 
                 }
 
-                if ((GrappleKey.CLIMB.isPressed() || GrappleKey.CLIMB_UP.isPressed() || GrappleKey.CLIMB_DOWN.isPressed()) /*&& !motor*/) {
+                if ((GrappleKey.CLIMB.isPressed() || MinecraftClient.getInstance().options.jumpKey.isPressed() || MinecraftClient.getInstance().options.sneakKey.isPressed()) /*&& !motor*/) {
                     Vec climbMotion = anchor.y != playerPos.y
                             ? this.calculateClimbingMotion(hookEntity, playerToAnchorDist, distToAnchor, spherevec)
                             : new Vec(0, 0, 0);
@@ -322,9 +327,10 @@ public class GrapplingHookPhysicsController {
         Vec facing = new Vec(entity.getRotationVector()).normalize();
 
         // WASD movement
-        if (!doJump && !isClimbing) {
-            this.applyPlayerMovement();
+        if (!doJump /*&& !isClimbing*/) {
+            //this.applyPlayerMovement();
         }
+        this.applyPlayerMovement();
 
         // jump
         if (doJump) {
@@ -333,7 +339,7 @@ public class GrapplingHookPhysicsController {
 
             this.doJump(entity, jumpSpeed, averagemotiontowards, minSphereVecDist);
             //GrappleModClient.get().resetRopeJumpTime(this.entity.getWorld());
-            return;
+            //return;
         }
 
         // now to actually apply everything to the player
@@ -362,9 +368,9 @@ public class GrapplingHookPhysicsController {
 
             climbDelta = MathHelper.clamp(climbDelta, -1.0D, 1.0D);
 
-        } else if (GrappleKey.CLIMB_UP.isPressed()) {
+        } else if (MinecraftClient.getInstance().options.jumpKey.isPressed()) {
             climbDelta = 1.0D;
-        } else if (GrappleKey.CLIMB_DOWN.isPressed()) {
+        } else if (MinecraftClient.getInstance().options.sneakKey.isPressed()) {
             climbDelta = -1.0D;
         }
 
@@ -507,7 +513,12 @@ public class GrapplingHookPhysicsController {
     }
 
     public void doJump(Entity player, double jumppower, Vec averagemotiontowards, double min_spherevec_dist) {
-        if (jumppower > 0) {
+        //player.sendMessage(Text.of("Jumping " + player.getVelocity().length() * 2));
+        //TODO das geiler machen vom wibe
+        motion.mutableScale(player.getVelocity().length() * 2);
+        this.motion.applyAsMotionTo(player);
+
+        /*if (jumppower > 0) {
             if (GrappleSettings.INSTANCE.getRope_jump_at_angle() && min_spherevec_dist > 1) {
                 motion.mutableAdd(averagemotiontowards.withMagnitude(jumppower));
             } else {
@@ -518,7 +529,9 @@ public class GrapplingHookPhysicsController {
                 }
             }
             this.motion.applyAsMotionTo(player);
-        }
+        }*/
+        // WebEntity.Companion.jumpEntity(player);
+        doJump = false;
 
         this.disable();
         this.updateServerPos();
@@ -589,7 +602,7 @@ public class GrapplingHookPhysicsController {
     }
 
     public void applyPlayerMovement() {
-        entity.sendMessage(Text.of("Applying Player Movement"));
+        //entity.sendMessage(Text.of("Applying Player Movement"));
         Vec additionalMotion = this.playerMovement.withMagnitude(0.015 + this.motion.length() * 0.01)
                 .scale(this.playerMovementMult);
         this.motion.mutableAdd(additionalMotion);

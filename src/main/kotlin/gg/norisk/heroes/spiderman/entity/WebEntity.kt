@@ -1,28 +1,34 @@
 package gg.norisk.heroes.spiderman.entity
 
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
+import gg.norisk.heroes.spiderman.grapple.GrappleModUtils.webEntityDiscardPacket
 import gg.norisk.heroes.spiderman.grapple.GrapplingHookPhysicsController
 import gg.norisk.heroes.spiderman.grapple.RopeSegmentHandler
-import gg.norisk.heroes.spiderman.movement.PullMovement
 import gg.norisk.heroes.spiderman.player.gravity
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
+import gg.norisk.heroes.spiderman.sound.FlyingSoundInstance
 import gg.norisk.heroes.spiderman.util.Vec
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.data.DataTracker
+import net.minecraft.entity.data.TrackedData
 import net.minecraft.entity.data.TrackedDataHandlerRegistry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity
 import net.minecraft.item.Item
 import net.minecraft.item.Items
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvents
 import net.minecraft.util.hit.HitResult
+import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import net.silkmc.silk.core.entity.modifyVelocity
-import net.silkmc.silk.core.text.literal
 import java.util.*
+import kotlin.random.Random
 
 
 class WebEntity : ThrownItemEntity {
@@ -41,6 +47,34 @@ class WebEntity : ThrownItemEntity {
             DataTracker.registerData(WebEntity::class.java, TrackedDataHandlerRegistry.OPTIONAL_UUID)
         val COLLIDED =
             DataTracker.registerData(WebEntity::class.java, TrackedDataHandlerRegistry.BOOLEAN)
+
+        fun initServer() {
+            webEntityDiscardPacket.receiveOnServer { packet, context ->
+                for (world in context.server.worlds) {
+                    val entity = world.getEntityById(packet) as? WebEntity ?: continue
+                    if (entity.ownerId == context.player.uuid) {
+                        println("Found $entity")
+                        entity.discard()
+                    }
+                }
+            }
+        }
+
+        fun removeWebs(player: PlayerEntity) {
+            for (world in player.server?.worlds ?: return) {
+                for (webEntity in world.iterateEntities()
+                    .filterIsInstance<WebEntity>()
+                    .filter { it.ownerId == player.uuid }) {
+                    if (webEntity.ownerId == player.uuid) {
+                        webEntity.discard()
+                    }
+                }
+            }
+        }
+
+        fun jumpEntity(player: Entity) {
+            player.modifyVelocity(player.rotationVector.normalize().multiply(5.0))
+        }
     }
 
     init {
@@ -80,6 +114,25 @@ class WebEntity : ThrownItemEntity {
         this.dataTracker.startTracking(COLLIDED, false)
     }
 
+    override fun onTrackedDataSet(trackedData: TrackedData<*>?) {
+        super.onTrackedDataSet(trackedData)
+        if (COLLIDED.equals(trackedData)) {
+            if (isCollided) {
+                //pullTowardsWeb(owner)
+                world.playSound(
+                    owner as? PlayerEntity?,
+                    this.x,
+                    this.y,
+                    this.z,
+                    SoundEvents.ENTITY_SLIME_SQUISH,
+                    SoundCategory.NEUTRAL,
+                    0.5f,
+                    Random.nextDouble(1.5, 2.0).toFloat()
+                )
+            }
+        }
+    }
+
     override fun getOwner(): Entity? {
         return this.world.getPlayerByUuid(ownerId ?: return null)
     }
@@ -94,18 +147,30 @@ class WebEntity : ThrownItemEntity {
     }
 
     override fun tick() {
+        //println("$world $id $uuid")
         val player = owner as? PlayerEntity? ?: return
 
-        if (world.isClient) {
-            player.sendMessage("RopeLength: $ropeLength".literal)
+        if (player.isDead) {
+            discard()
+        }
+
+        if (world.isClient && !this.isAlive) {
+            //player.sendMessage("RopeLength: $ropeLength".literal)
         }
 
         //handleHookPhysics()
 
-        if (world.isClient && isCollided) {
+        if (world.isClient && isCollided && !isRemoved) {
             if (owner == MinecraftClient.getInstance().player && GrappleModUtils.controller == null) {
-                owner?.sendMessage("Creating Controller".literal)
-                GrappleModUtils.controller = GrapplingHookPhysicsController(this.id, owner!!.id, this.world)
+                //owner?.sendMessage("Creating Controller".literal)
+                val controller = GrapplingHookPhysicsController(this.id, owner!!.id, this.world)
+                GrappleModUtils.controller = controller
+                MinecraftClient.getInstance().soundManager.play(
+                    FlyingSoundInstance(
+                        player as ClientPlayerEntity,
+                        { controller.isControllerActive }
+                    )
+                )
             }
 
             if (!this.isAlive) {
@@ -139,6 +204,26 @@ class WebEntity : ThrownItemEntity {
                 player.modifyVelocity(direction.multiply(speed))
             }*/
         }
+    }
+
+    override fun setVelocity(entity: Entity, f: Float, g: Float, h: Float, i: Float, j: Float) {
+        val k = -MathHelper.sin(g * (Math.PI / 180.0).toFloat()) * MathHelper.cos(f * (Math.PI / 180.0).toFloat())
+        val l = -MathHelper.sin((f + h) * (Math.PI / 180.0).toFloat())
+        val m = MathHelper.cos(g * (Math.PI / 180.0).toFloat()) * MathHelper.cos(f * (Math.PI / 180.0).toFloat())
+        this.setVelocity(k.toDouble(), l.toDouble(), m.toDouble(), i, j)
+        val vec3d = entity.velocity
+        this.velocity = velocity.add(vec3d.x, 0.0, vec3d.z)
+    }
+
+    private fun pullTowardsWeb(player: Entity?) {
+        val direction = this.pos.subtract(player?.pos ?: return).normalize()
+        //Kann man noch anpassen
+        val speed = if (player.distanceTo(this) < 2) {
+            0.2
+        } else {
+            1.5
+        }
+        player.modifyVelocity(direction.multiply(speed))
     }
 
     override fun getGravity(): Float {
