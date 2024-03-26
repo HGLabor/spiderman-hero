@@ -10,6 +10,7 @@ import gg.norisk.heroes.spiderman.movement.PullMovement
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.registry.EntityRendererRegistry
 import gg.norisk.heroes.spiderman.registry.ItemRegistry
+import gg.norisk.heroes.spiderman.render.Speedlines
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.api.ModInitializer
@@ -49,6 +50,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         EntityRendererRegistry.init()
         GrappleKey.registerAll()
         GrappleModUtils.init()
+        Speedlines.initClient()
     }
 
     override fun onInitializeServer() {
