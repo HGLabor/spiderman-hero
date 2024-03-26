@@ -13,6 +13,7 @@ import net.minecraft.client.render.Tessellator
 import net.minecraft.client.render.VertexFormat
 import net.minecraft.client.render.VertexFormats
 import net.minecraft.util.math.MathHelper
+import org.lwjgl.opengl.GL11
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,7 +24,7 @@ object Speedlines {
 
     lateinit var edge: GlUniform
     lateinit var speedlinesRenderTypeProgram: ShaderProgram
-    
+
     fun initClient() {
         CoreShaderRegistrationCallback.EVENT.register(CoreShaderRegistrationCallback { context: CoreShaderRegistrationCallback.RegistrationContext ->
             context.register(
@@ -63,6 +64,8 @@ object Speedlines {
         RenderSystem.enableBlend()
         RenderSystem.defaultBlendFunc()
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
+        RenderSystem.disableCull()
+        RenderSystem.depthFunc(GL11.GL_ALWAYS)
     }
 
     private fun endRender() {
