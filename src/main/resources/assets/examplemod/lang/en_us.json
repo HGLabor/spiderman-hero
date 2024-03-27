@@ -1,3 +1,5 @@
 {
-  "item.examplemod.webshooter": "Web Shooter"
+  "item.examplemod.webshooter": "Web Shooter",
+  "key.spiderman.webshooter": "Web Shooter",
+  "category.spiderman.abilities": "Spiderman Abilities"
 }

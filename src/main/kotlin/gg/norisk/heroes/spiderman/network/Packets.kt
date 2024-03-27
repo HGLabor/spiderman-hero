@@ -6,4 +6,5 @@ import net.silkmc.silk.network.packet.c2sPacket
 
 @OptIn(ExperimentalSerializationApi::class)
 object Packets {
+    val webShooterPacketC2S = c2sPacket<Unit>("webshooter".toId())
 }

@@ -1,7 +1,6 @@
 package gg.norisk.heroes.spiderman.registry
 
 import gg.norisk.heroes.spiderman.Manager.toId
-import gg.norisk.heroes.spiderman.item.WebShooterItem
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
@@ -10,11 +9,8 @@ import net.minecraft.item.Items
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.text.Text
-import net.minecraft.util.Rarity
 
 object ItemRegistry {
-    val WEBSHOOTER: Item = registerItem("webshooter", WebShooterItem(Item.Settings().maxCount(1).rarity(Rarity.EPIC)))
-
     fun init() {
     }
 
@@ -24,7 +20,6 @@ object ItemRegistry {
             .displayName(Text.translatable("itemGroup.examplemod.spiderman_items"))
             .icon { ItemStack(Items.COBWEB) }
             .entries { _: ItemGroup.DisplayContext?, entries: ItemGroup.Entries ->
-                entries.add(WEBSHOOTER)
             }.build()
     )
 
