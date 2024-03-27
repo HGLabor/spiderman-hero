@@ -44,7 +44,7 @@ import kotlin.random.Random
 class WebEntity : ThrownItemEntity {
     var originPos: Vec3d = pos
     var isDummy = false
-    var ropeLength: Double = 30.0
+    var ropeLength: Double = 60.0
     var taut: Double = 1.0
     val segmentHandler: RopeSegmentHandler = RopeSegmentHandler(
         this,
