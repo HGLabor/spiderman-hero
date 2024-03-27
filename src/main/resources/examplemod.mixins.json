@@ -12,6 +12,7 @@
   "client": [
     "client.KeyboardMixin",
     "client.MouseMixin",
+    "client.gl.PostEffectProcessorAccessor",
     "client.network.AbstractClientPlayerEntityMixin",
     "client.network.ClientPlayerEntityMixin",
     "client.render.CameraMixin",
