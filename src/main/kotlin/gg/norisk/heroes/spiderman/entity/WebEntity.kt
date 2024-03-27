@@ -6,6 +6,7 @@ import gg.norisk.heroes.spiderman.grapple.GrappleModUtils.webEntityDiscardPacket
 import gg.norisk.heroes.spiderman.grapple.GrapplingHookPhysicsController
 import gg.norisk.heroes.spiderman.grapple.RopeSegmentHandler
 import gg.norisk.heroes.spiderman.player.gravity
+import gg.norisk.heroes.spiderman.player.isSwinging
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.sound.FlyingSoundInstance
 import gg.norisk.heroes.spiderman.util.Vec
@@ -28,6 +29,7 @@ import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import net.silkmc.silk.core.entity.modifyVelocity
+import net.silkmc.silk.core.text.broadcastText
 import java.util.*
 import kotlin.random.Random
 
@@ -54,7 +56,6 @@ class WebEntity : ThrownItemEntity {
                 for (world in context.server.worlds) {
                     val entity = world.getEntityById(packet) as? WebEntity ?: continue
                     if (entity.ownerId == context.player.uuid) {
-                        println("Found $entity")
                         entity.discard()
                     }
                 }
@@ -115,10 +116,17 @@ class WebEntity : ThrownItemEntity {
         this.dataTracker.startTracking(COLLIDED, false)
     }
 
+    override fun onRemoved() {
+        super.onRemoved()
+        server?.broadcastText("Removed $this")
+        (owner as? PlayerEntity?)?.isSwinging = false
+    }
+
     override fun onTrackedDataSet(trackedData: TrackedData<*>?) {
         super.onTrackedDataSet(trackedData)
         if (COLLIDED.equals(trackedData)) {
             if (isCollided) {
+                (owner as? PlayerEntity?)?.isSwinging = true
                 //pullTowardsWeb(owner)
                 world.playSound(
                     owner as? PlayerEntity?,

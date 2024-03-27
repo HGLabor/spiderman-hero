@@ -1,8 +1,10 @@
 package gg.norisk.heroes.spiderman.movement
 
 import gg.norisk.heroes.spiderman.entity.WebEntity
+import gg.norisk.heroes.spiderman.player.isSwinging
 import gg.norisk.heroes.spiderman.player.setLeashTarget
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.LightmapTextureManager
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
@@ -14,6 +16,7 @@ import net.minecraft.entity.SpawnReason
 import net.minecraft.entity.mob.MobEntity
 import net.minecraft.entity.passive.BatEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.util.Arm
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
@@ -78,7 +81,29 @@ object LeadRenderer {
         player: PlayerEntity
     ) {
         matrixStack.push()
-        val vec3d = player.getLeashPos(f).add(0.0,0.5,0.0)
+        val vec3d =
+            if (player == MinecraftClient.getInstance().player && MinecraftClient.getInstance().options.perspective.isFirstPerson) {
+                val g: Float = MathHelper.lerp(f * 0.5f, player.yaw, player.prevYaw) * (Math.PI / 180.0).toFloat()
+                val h: Float = MathHelper.lerp(f * 0.5f, player.pitch, player.prevPitch) * (Math.PI / 180.0).toFloat()
+                val d = if (player.mainArm == Arm.RIGHT) -1.0 else 1.0
+                val vec3d = Vec3d(0.39 * d, 0.0, 0.3)
+                vec3d.rotateX(-h).rotateY(-g).add(player.getCameraPosVec(f))
+            } else {
+                if (player.isSwinging) {
+                    val h: Float = MathHelper.lerp(f, player.prevBodyYaw, player.bodyYaw) * (Math.PI / 180.0).toFloat()
+                    val m: Double = player.boundingBox.lengthY + 0.2
+                    val e = if (player.isInSneakingPose) -0.2 else 0.07
+                    player.getLerpedPos(f).add(Vec3d(0.0, m, e).rotateY(-h))
+                } else {
+                    val d = 0.22 * (if (player.mainArm == Arm.RIGHT) -1.0 else 1.0)
+                    val g: Float =
+                        MathHelper.lerp(f * 0.5f, player.pitch, player.prevPitch) * (Math.PI / 180.0).toFloat()
+                    val h: Float = MathHelper.lerp(f, player.prevBodyYaw, player.bodyYaw) * (Math.PI / 180.0).toFloat()
+                    val m: Double = player.boundingBox.lengthY - 1.0
+                    val e = if (player.isInSneakingPose) -0.2 else 0.07
+                    player.getLerpedPos(f).add(Vec3d(d, m, e).rotateY(-h))
+                }
+            }
         val d: Double =
             (MathHelper.lerp(
                 f,

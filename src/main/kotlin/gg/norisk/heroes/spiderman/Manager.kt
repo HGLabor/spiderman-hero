@@ -25,10 +25,10 @@ import org.apache.logging.log4j.LogManager
 
 object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitializer {
     val logger = LogManager.getLogger("spiderman-hero")
-    var fovMultiplier = false
-    var soundEffect = false
-    var cameraOffset = false
-    var speedlines = false
+    var fovMultiplier = true
+    var soundEffect = true
+    var cameraOffset = true
+    var speedlines = true
 
     override fun onInitialize() {
         // Common initialization

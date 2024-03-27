@@ -19,6 +19,7 @@
     "client.render.WorldRendererMixin",
     "client.render.entity.FlyingItemEntityRendererMixin",
     "client.render.entity.MobEntityRendererMixin",
-    "client.render.entity.PlayerEntityRendererMixin"
+    "client.render.entity.PlayerEntityRendererMixin",
+    "client.render.entity.model.BipedEntityModelMixin"
   ]
 }
