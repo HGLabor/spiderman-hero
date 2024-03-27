@@ -37,6 +37,7 @@ object Speedlines {
         })
 
         HudRenderCallback.EVENT.register(HudRenderCallback { context: DrawContext, delta: Float ->
+            println("Mananager ${Manager.speedlines}")
             if (!Manager.speedlines) return@HudRenderCallback
             val width = client.getWindow().width.toFloat()
             val height = client.getWindow().height.toFloat()

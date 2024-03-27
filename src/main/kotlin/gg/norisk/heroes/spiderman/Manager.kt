@@ -20,14 +20,15 @@ import net.minecraft.util.Identifier
 import net.minecraft.world.Difficulty
 import net.minecraft.world.GameRules
 import net.silkmc.silk.commands.command
+import net.silkmc.silk.core.text.literal
 import org.apache.logging.log4j.LogManager
 
 object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitializer {
     val logger = LogManager.getLogger("spiderman-hero")
-    val fovMultiplier = false
-    val soundEffect = false
-    val cameraOffset = false
-    val speedlines = false
+    var fovMultiplier = false
+    var soundEffect = false
+    var cameraOffset = false
+    var speedlines = false
 
     override fun onInitialize() {
         // Common initialization
@@ -53,22 +54,23 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
             command("visuell") {
                 literal("fovmultiplier") {
                     runs {
-                        fovMultiplier != fovMultiplier
+                        fovMultiplier = !fovMultiplier
                     }
                 }
                 literal("soundeffect") {
                     runs {
-                        soundEffect != soundEffect
+                        soundEffect = !soundEffect
                     }
                 }
                 literal("cameraoffset") {
                     runs {
-                        cameraOffset != cameraOffset
+                        cameraOffset = !cameraOffset
                     }
                 }
                 literal("speedlines") {
                     runs {
-                        speedlines != speedlines
+                        speedlines = !speedlines
+                        this.source.sendMessage("Speedlines: $speedlines".literal)
                     }
                 }
             }
