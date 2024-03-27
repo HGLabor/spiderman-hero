@@ -1,5 +1,6 @@
 package gg.norisk.heroes.spiderman
 
+import gg.norisk.heroes.spiderman.abilities.WebShooter
 import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.grapple.GrappleKey
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
@@ -7,6 +8,7 @@ import gg.norisk.heroes.spiderman.movement.LeadRenderer
 import gg.norisk.heroes.spiderman.movement.Parabel
 import gg.norisk.heroes.spiderman.movement.PendulumMovement
 import gg.norisk.heroes.spiderman.movement.PullMovement
+import gg.norisk.heroes.spiderman.network.MouseListener
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.registry.EntityRendererRegistry
 import gg.norisk.heroes.spiderman.registry.ItemRegistry
@@ -39,6 +41,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         PullMovement.init()
         Parabel.init()
 
+        WebShooter.initServer()
         WebEntity.initServer()
 
         ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted {
@@ -83,6 +86,8 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         GrappleKey.registerAll()
         GrappleModUtils.init()
         Speedlines.initClient()
+        WebShooter.initClient()
+        MouseListener.initClient()
     }
 
     override fun onInitializeServer() {

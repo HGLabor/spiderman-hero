@@ -22,8 +22,10 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.projectile.thrown.ThrownItemEntity
 import net.minecraft.item.Item
 import net.minecraft.item.Items
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
+import net.minecraft.util.hit.EntityHitResult
 import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
@@ -60,6 +62,11 @@ class WebEntity : ThrownItemEntity {
                     }
                 }
             }
+        }
+
+        fun ServerPlayerEntity.getWeb(): WebEntity? {
+            return serverWorld.iterateEntities()
+                .filterIsInstance<WebEntity>().firstOrNull { it.ownerId == this.uuid }
         }
 
         fun removeWebs(player: PlayerEntity) {
@@ -107,7 +114,16 @@ class WebEntity : ThrownItemEntity {
 
     override fun onCollision(hitResult: HitResult) {
         super.onCollision(hitResult)
-        isCollided = true
+        if (hitResult is EntityHitResult) {
+        } else {
+            isCollided = true
+        }
+    }
+
+    override fun onEntityHit(entityHitResult: EntityHitResult) {
+        super.onEntityHit(entityHitResult)
+        val entity = entityHitResult.entity
+        this.startRiding(entity, true)
     }
 
     override fun initDataTracker() {
@@ -225,15 +241,27 @@ class WebEntity : ThrownItemEntity {
         this.velocity = velocity.add(vec3d.x, 0.0, vec3d.z)
     }
 
-    private fun pullTowardsWeb(player: Entity?) {
-        val direction = this.pos.subtract(player?.pos ?: return).normalize()
+    fun pullVehicleTowardsOwner(speed: Double = 1.5) {
+        val player = owner as? PlayerEntity ?: return
+        val direction = player.pos.subtract(this.vehicle?.pos ?: return).normalize()
         //Kann man noch anpassen
-        val speed = if (player.distanceTo(this) < 2) {
+        val multiplySpeed = if (player.distanceTo(this.vehicle) < 2) {
             0.2
         } else {
-            1.5
+            speed
         }
-        player.modifyVelocity(direction.multiply(speed))
+        this.vehicle?.modifyVelocity(direction.multiply(multiplySpeed))
+    }
+
+    fun pullEntityTowardsWeb(entity: Entity?, speed: Double = 1.5) {
+        val direction = this.pos.subtract(entity?.pos ?: return).normalize()
+        //Kann man noch anpassen
+        val multiplySpeed = if (entity.distanceTo(this) < 2) {
+            0.2
+        } else {
+            speed
+        }
+        entity.modifyVelocity(direction.multiply(multiplySpeed))
     }
 
     override fun getGravity(): Float {

@@ -4,11 +4,21 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.data.DataTracker
 import net.minecraft.entity.data.TrackedDataHandlerRegistry
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvents
 import net.minecraft.util.math.BlockPos
 import java.util.*
+import kotlin.random.Random
 
 interface SpidermanPlayer {
 
+}
+
+fun PlayerEntity.playGenericSpidermanSound() {
+    world.playSoundFromEntity(
+        null, this, SoundEvents.ENTITY_SPIDER_AMBIENT, SoundCategory.PLAYERS, 0.5f,
+        Random.nextDouble(1.5, 3.0).toFloat()
+    )
 }
 
 var PlayerEntity.gravity: Float
