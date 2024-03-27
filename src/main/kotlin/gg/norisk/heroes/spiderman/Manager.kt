@@ -12,7 +12,6 @@ import gg.norisk.heroes.spiderman.network.MouseListener
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.registry.EntityRendererRegistry
 import gg.norisk.heroes.spiderman.registry.ItemRegistry
-import gg.norisk.heroes.spiderman.render.MotionBlur
 import gg.norisk.heroes.spiderman.render.Speedlines
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.DedicatedServerModInitializer
@@ -87,7 +86,6 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         GrappleKey.registerAll()
         GrappleModUtils.init()
         Speedlines.initClient()
-        MotionBlur.initClient()
         WebShooter.initClient()
         MouseListener.initClient()
     }
