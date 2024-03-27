@@ -10,11 +10,11 @@ import gg.norisk.heroes.spiderman.player.isSwinging
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.sound.FlyingSoundInstance
 import gg.norisk.heroes.spiderman.util.Vec
+import kotlinx.coroutines.Job
+import net.minecraft.block.Blocks
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayerEntity
-import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityType
-import net.minecraft.entity.LivingEntity
+import net.minecraft.entity.*
 import net.minecraft.entity.data.DataTracker
 import net.minecraft.entity.data.TrackedData
 import net.minecraft.entity.data.TrackedDataHandlerRegistry
@@ -27,10 +27,15 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 import net.minecraft.util.hit.EntityHitResult
 import net.minecraft.util.hit.HitResult
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
+import net.minecraft.util.math.Vec3i
 import net.minecraft.world.World
 import net.silkmc.silk.core.entity.modifyVelocity
+import net.silkmc.silk.core.kotlin.ticks
+import net.silkmc.silk.core.math.geometry.filledSpherePositionSet
+import net.silkmc.silk.core.task.mcCoroutineTask
 import net.silkmc.silk.core.text.broadcastText
 import java.util.*
 import kotlin.random.Random
@@ -52,6 +57,10 @@ class WebEntity : ThrownItemEntity {
             DataTracker.registerData(WebEntity::class.java, TrackedDataHandlerRegistry.OPTIONAL_UUID)
         val COLLIDED =
             DataTracker.registerData(WebEntity::class.java, TrackedDataHandlerRegistry.BOOLEAN)
+        val SCALE =
+            DataTracker.registerData(WebEntity::class.java, TrackedDataHandlerRegistry.FLOAT)
+
+        private val cobwebCleanUp = mutableMapOf<BlockPos, Job>()
 
         fun initServer() {
             webEntityDiscardPacket.receiveOnServer { packet, context ->
@@ -98,6 +107,14 @@ class WebEntity : ThrownItemEntity {
             this.dataTracker.set(COLLIDED, value)
         }
 
+    var scale: Float
+        get() {
+            return this.dataTracker.get(SCALE)
+        }
+        set(value) {
+            this.dataTracker.set(SCALE, MathHelper.clamp(value, 0.1f, 10f))
+        }
+
     var ownerId: UUID?
         get() {
             return this.dataTracker.get(OWNER).orElse(null)
@@ -130,12 +147,21 @@ class WebEntity : ThrownItemEntity {
         super.initDataTracker()
         this.dataTracker.startTracking(OWNER, Optional.empty())
         this.dataTracker.startTracking(COLLIDED, false)
+        this.dataTracker.startTracking(SCALE, 1f)
     }
 
     override fun onRemoved() {
         super.onRemoved()
         server?.broadcastText("Removed $this")
         (owner as? PlayerEntity?)?.isSwinging = false
+    }
+
+    override fun getLeashOffset(): Vec3d {
+        return Vec3d(0.0, 0.25 * standingEyeHeight.toDouble(), 0.0)
+    }
+
+    override fun getDimensions(entityPose: EntityPose): EntityDimensions {
+        return super.getDimensions(entityPose).scaled(1.0f + 1.5f * scale)
     }
 
     override fun onTrackedDataSet(trackedData: TrackedData<*>?) {
@@ -155,6 +181,8 @@ class WebEntity : ThrownItemEntity {
                     Random.nextDouble(1.5, 2.0).toFloat()
                 )
             }
+        } else if (SCALE.equals(trackedData)) {
+            calculateDimensions()
         }
     }
 
@@ -169,6 +197,28 @@ class WebEntity : ThrownItemEntity {
 
     override fun isTouchingWater(): Boolean {
         return super.isTouchingWater()
+    }
+
+    fun convertToCobwebs() {
+        val vec3i = Vec3i(this.blockX, this.blockY, this.blockZ)
+        for (blockPos in vec3i.filledSpherePositionSet((1 + scale / 4).toInt())) {
+            if (Random.nextBoolean()) {
+                val blockState = world.getBlockState(blockPos)
+                if (blockState.isAir) {
+                    world.setBlockState(blockPos, Blocks.COBWEB.defaultState)
+
+                    //CLEANUP
+                    cobwebCleanUp[blockPos]?.cancel()
+                    cobwebCleanUp[blockPos] = mcCoroutineTask(delay = Random.nextInt(20, 100).ticks) {
+                        if (world.getBlockState(blockPos).isOf(Blocks.COBWEB)) {
+                            world.breakBlock(blockPos, false, owner)
+                        }
+                        cobwebCleanUp.remove(blockPos)
+                    }
+                }
+            }
+        }
+        discard()
     }
 
     override fun tick() {

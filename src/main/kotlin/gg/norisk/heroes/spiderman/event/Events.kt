@@ -11,6 +11,7 @@ import net.silkmc.silk.core.event.Event
 @OptIn(ExperimentalSilkApi::class)
 object Events {
     open class MouseClickEvent(val key: InputUtil.Key, val pressed: Boolean)
+    open class MouseScrollEvent(val window: Long, val horizontal: Double, val vertical: Double)
     open class AfterTickInputEvent(val input: Input)
     open class KeyEvent(val key: Int, val scanCode: Int, val action: Int, val client: MinecraftClient) {
         override fun toString(): String {
@@ -28,6 +29,7 @@ object Events {
 
 
     val mouseClickEvent = Event.onlySync<MouseClickEvent>()
+    val mouseScrollEvent = Event.onlySync<MouseScrollEvent>()
     val afterTickInputEvent = Event.onlySync<AfterTickInputEvent>()
     val keyEvent = Event.onlySync<KeyEvent>()
 }

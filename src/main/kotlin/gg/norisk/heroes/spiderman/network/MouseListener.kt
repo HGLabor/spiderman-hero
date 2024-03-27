@@ -2,6 +2,7 @@ package gg.norisk.heroes.spiderman.network
 
 import gg.norisk.heroes.spiderman.Manager.toId
 import gg.norisk.heroes.spiderman.event.Events.mouseClickEvent
+import gg.norisk.heroes.spiderman.event.Events.mouseScrollEvent
 import kotlinx.serialization.Serializable
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
@@ -36,12 +37,16 @@ object MouseListener {
     }
 
     val mousePacket = c2sPacket<MousePacket>("mouse-packet".toId())
+    val mouseScrollPacket = c2sPacket<Boolean>("mouse-scroll".toId())
 
     fun init() {
 
     }
 
     fun initClient() {
+        mouseScrollEvent.listen {
+            mouseScrollPacket.send(it.vertical > 0)
+        }
         mouseClickEvent.listen {
             if (MinecraftClient.getInstance().options.attackKey.matchesMouse(it.key.code)) {
                 mousePacket.send(MousePacket(Type.LEFT, if (it.pressed) Action.CLICK else Action.RELEASE))

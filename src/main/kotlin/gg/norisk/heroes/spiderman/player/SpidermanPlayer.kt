@@ -29,6 +29,14 @@ var PlayerEntity.gravity: Float
         this.dataTracker.set(gravityTracker, value)
     }
 
+var PlayerEntity.isSpiderman: Boolean
+    get() {
+        return this.dataTracker.get(spidermanTracker)
+    }
+    set(value) {
+        this.dataTracker.set(spidermanTracker, value)
+    }
+
 var PlayerEntity.isSwinging: Boolean
     get() {
         return this.dataTracker.get(swingingTracker)
@@ -60,6 +68,8 @@ fun PlayerEntity.setLeashTarget(entity: Entity) {
 val gravityTracker =
     DataTracker.registerData(PlayerEntity::class.java, TrackedDataHandlerRegistry.FLOAT)
 val swingingTracker =
+    DataTracker.registerData(PlayerEntity::class.java, TrackedDataHandlerRegistry.BOOLEAN)
+val spidermanTracker =
     DataTracker.registerData(PlayerEntity::class.java, TrackedDataHandlerRegistry.BOOLEAN)
 val spidermanAnchorPointTracker =
     DataTracker.registerData(PlayerEntity::class.java, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS)

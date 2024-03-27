@@ -6,6 +6,7 @@ import gg.norisk.heroes.spiderman.event.Events
 import gg.norisk.heroes.spiderman.event.Events.keyEvent
 import gg.norisk.heroes.spiderman.network.MouseListener
 import gg.norisk.heroes.spiderman.network.MouseListener.mousePacket
+import gg.norisk.heroes.spiderman.network.MouseListener.mouseScrollPacket
 import gg.norisk.heroes.spiderman.network.Packets.webShooterPacketC2S
 import gg.norisk.heroes.spiderman.player.playGenericSpidermanSound
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
@@ -13,6 +14,7 @@ import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.util.InputUtil
 import net.minecraft.item.Items
 import net.silkmc.silk.core.annotations.ExperimentalSilkApi
+import net.silkmc.silk.core.text.literal
 import net.silkmc.silk.network.packet.ServerPacketContext
 import org.lwjgl.glfw.GLFW
 
@@ -29,6 +31,7 @@ object WebShooter {
     fun initServer() {
         webShooterPacketC2S.receiveOnServer(::onWebShooterPacket)
         mousePacket.receiveOnServer(::onMousePacket)
+        mouseScrollPacket.receiveOnServer(::onMouseScrollPacket)
     }
 
     @OptIn(ExperimentalSilkApi::class)
@@ -55,6 +58,12 @@ object WebShooter {
         world.spawnEntity(webEntity)
     }
 
+    private fun onMouseScrollPacket(isForward: Boolean, context: ServerPacketContext) {
+        val player = context.player
+        val web = player.getWeb() ?: return
+        web.scale += 0.5f
+    }
+
     private fun onMousePacket(mousePacket: MouseListener.MousePacket, context: ServerPacketContext) {
         val player = context.player
 
@@ -72,6 +81,15 @@ object WebShooter {
                 if (web != null && web.hasVehicle()) {
                     player.playGenericSpidermanSound()
                     web.pullEntityTowardsWeb(player, 3.0)
+                }
+            }
+
+            mousePacket.isMiddle() && mousePacket.isClicked() -> {
+                val web = player.getWeb()
+                player.sendMessage("$mousePacket".literal)
+                if (web != null) {
+                    player.playGenericSpidermanSound()
+                    web.convertToCobwebs()
                 }
             }
 
