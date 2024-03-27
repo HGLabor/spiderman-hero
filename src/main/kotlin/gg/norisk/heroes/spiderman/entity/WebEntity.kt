@@ -1,5 +1,6 @@
 package gg.norisk.heroes.spiderman.entity
 
+import gg.norisk.heroes.spiderman.Manager
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils.webEntityDiscardPacket
 import gg.norisk.heroes.spiderman.grapple.GrapplingHookPhysicsController
@@ -165,12 +166,13 @@ class WebEntity : ThrownItemEntity {
                 //owner?.sendMessage("Creating Controller".literal)
                 val controller = GrapplingHookPhysicsController(this.id, owner!!.id, this.world)
                 GrappleModUtils.controller = controller
-                MinecraftClient.getInstance().soundManager.play(
-                    FlyingSoundInstance(
-                        player as ClientPlayerEntity,
-                        { controller.isControllerActive }
+                if (Manager.soundEffect) {
+                    MinecraftClient.getInstance().soundManager.play(
+                        FlyingSoundInstance(
+                            player as ClientPlayerEntity
+                        ) { controller.isControllerActive }
                     )
-                )
+                }
             }
 
             if (!this.isAlive) {

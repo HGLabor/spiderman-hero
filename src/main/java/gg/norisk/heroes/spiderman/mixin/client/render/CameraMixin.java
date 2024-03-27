@@ -1,5 +1,6 @@
 package gg.norisk.heroes.spiderman.mixin.client.render;
 
+import gg.norisk.heroes.spiderman.Manager;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
@@ -60,10 +61,12 @@ public abstract class CameraMixin {
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;moveBy(DDD)V", ordinal = 0))
     private void setPosInjection2(Args args, BlockView blockView, Entity entity, boolean bl, boolean bl2, float delta) {
-        //TODO geilen wert finden TODO
         var velocity = entity.getVelocity().length();
         var length = 2.0 + velocity * 3;
         lerpedLength = MathHelper.lerp((delta * 0.2), lerpedLength, length);
-        args.set(0, -this.clipToSpace(lerpedLength));
+        if (Manager.INSTANCE.getCameraOffset()) {
+            args.set(0, -this.clipToSpace(lerpedLength));
+        }
+        //TODO geilen wert finden TODO
     }
 }

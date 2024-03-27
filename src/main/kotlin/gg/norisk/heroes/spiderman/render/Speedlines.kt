@@ -1,6 +1,7 @@
 package gg.norisk.heroes.spiderman.render
 
 import com.mojang.blaze3d.systems.RenderSystem
+import gg.norisk.heroes.spiderman.Manager
 import gg.norisk.heroes.spiderman.Manager.toId
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
@@ -36,6 +37,7 @@ object Speedlines {
         })
 
         HudRenderCallback.EVENT.register(HudRenderCallback { context: DrawContext, delta: Float ->
+            if (!Manager.speedlines) return@HudRenderCallback
             val width = client.getWindow().width.toFloat()
             val height = client.getWindow().height.toFloat()
 

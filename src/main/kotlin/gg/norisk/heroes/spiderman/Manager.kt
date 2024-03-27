@@ -19,10 +19,15 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.util.Identifier
 import net.minecraft.world.Difficulty
 import net.minecraft.world.GameRules
+import net.silkmc.silk.commands.command
 import org.apache.logging.log4j.LogManager
 
 object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitializer {
     val logger = LogManager.getLogger("spiderman-hero")
+    val fovMultiplier = false
+    val soundEffect = false
+    val cameraOffset = false
+    val speedlines = false
 
     override fun onInitialize() {
         // Common initialization
@@ -43,6 +48,31 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                 it.gameRules.get(GameRules.DO_WEATHER_CYCLE).set(false, it)
             }
         })
+
+        if (FabricLoader.getInstance().isDevelopmentEnvironment) {
+            command("visuell") {
+                literal("fovmultiplier") {
+                    runs {
+                        fovMultiplier != fovMultiplier
+                    }
+                }
+                literal("soundeffect") {
+                    runs {
+                        soundEffect != soundEffect
+                    }
+                }
+                literal("cameraoffset") {
+                    runs {
+                        cameraOffset != cameraOffset
+                    }
+                }
+                literal("speedlines") {
+                    runs {
+                        speedlines != speedlines
+                    }
+                }
+            }
+        }
     }
 
     override fun onInitializeClient() {
