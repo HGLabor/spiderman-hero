@@ -45,9 +45,11 @@ object MouseListener {
 
     fun initClient() {
         mouseScrollEvent.listen {
+            MinecraftClient.getInstance().player ?: return@listen
             mouseScrollPacket.send(it.vertical > 0)
         }
         mouseClickEvent.listen {
+            MinecraftClient.getInstance().player ?: return@listen
             if (MinecraftClient.getInstance().options.attackKey.matchesMouse(it.key.code)) {
                 mousePacket.send(MousePacket(Type.LEFT, if (it.pressed) Action.CLICK else Action.RELEASE))
             } else if (MinecraftClient.getInstance().options.useKey.matchesMouse(it.key.code)) {
@@ -57,6 +59,7 @@ object MouseListener {
             }
         }
         ClientTickEvents.END_CLIENT_TICK.register {
+            MinecraftClient.getInstance().player ?: return@register
             if (MinecraftClient.getInstance().options.attackKey.isPressed) {
                 mousePacket.send(MousePacket(Type.LEFT, Action.HOLD))
             }

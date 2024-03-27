@@ -42,6 +42,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         Parabel.init()
 
         WebShooter.initServer()
+        WebShooter.initCommon()
         WebEntity.initServer()
 
         ServerLifecycleEvents.SERVER_STARTED.register(ServerLifecycleEvents.ServerStarted {

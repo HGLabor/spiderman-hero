@@ -7,6 +7,7 @@
   },
   "mixins": [
     "block.CobwebBlockMixin",
+    "entity.EntityMixin",
     "entity.LivingEntityMixin",
     "entity.player.PlayerEntityMixin"
   ],
