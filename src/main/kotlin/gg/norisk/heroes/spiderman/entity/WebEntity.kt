@@ -209,7 +209,7 @@ class WebEntity : ThrownItemEntity {
 
                     //CLEANUP
                     cobwebCleanUp[blockPos]?.cancel()
-                    cobwebCleanUp[blockPos] = mcCoroutineTask(delay = Random.nextInt(20, 100).ticks) {
+                    cobwebCleanUp[blockPos] = mcCoroutineTask(delay = Random.nextInt(20, 300).ticks) {
                         if (world.getBlockState(blockPos).isOf(Blocks.COBWEB)) {
                             world.breakBlock(blockPos, false, owner)
                         }
