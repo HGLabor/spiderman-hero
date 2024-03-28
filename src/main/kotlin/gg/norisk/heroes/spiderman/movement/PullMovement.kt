@@ -1,6 +1,7 @@
 package gg.norisk.heroes.spiderman.movement
 
-import gg.norisk.heroes.spiderman.event.Events
+import gg.norisk.heroes.common.events.MouseClickEvent
+import gg.norisk.heroes.common.events.mouseClickEvent
 import net.minecraft.client.MinecraftClient
 import net.silkmc.silk.core.annotations.ExperimentalSilkApi
 import java.util.*
@@ -11,10 +12,10 @@ object PullMovement {
     var isPulling = mutableSetOf<UUID>()
 
     fun init() {
-        Events.mouseClickEvent.listen { onMouseClick(it) }
+        mouseClickEvent.listen { onMouseClick(it) }
     }
 
-    fun onMouseClick(mouseClickEvent: Events.MouseClickEvent) {
+    fun onMouseClick(mouseClickEvent: MouseClickEvent) {
         val player = MinecraftClient.getInstance().player ?: return
         if (MinecraftClient.getInstance().options.attackKey.matchesMouse(mouseClickEvent.key.code)) {
             if (mouseClickEvent.pressed) {

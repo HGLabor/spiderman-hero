@@ -1,5 +1,7 @@
 package gg.norisk.heroes.spiderman
 
+import gg.norisk.heroes.common.HeroInitializer
+import gg.norisk.heroes.common.hero.Hero
 import gg.norisk.heroes.spiderman.abilities.WebShooter
 import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.grapple.GrappleKey
@@ -8,11 +10,9 @@ import gg.norisk.heroes.spiderman.movement.LeadRenderer
 import gg.norisk.heroes.spiderman.movement.Parabel
 import gg.norisk.heroes.spiderman.movement.PendulumMovement
 import gg.norisk.heroes.spiderman.movement.PullMovement
-import gg.norisk.heroes.spiderman.network.MouseListener
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.registry.EntityRendererRegistry
 import gg.norisk.heroes.spiderman.registry.ItemRegistry
-import gg.norisk.heroes.spiderman.render.Speedlines
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.api.ModInitializer
@@ -25,7 +25,7 @@ import net.silkmc.silk.commands.command
 import net.silkmc.silk.core.text.literal
 import org.apache.logging.log4j.LogManager
 
-object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitializer {
+object Manager : HeroInitializer(), ModInitializer, DedicatedServerModInitializer, ClientModInitializer {
     val logger = LogManager.getLogger("spiderman-hero")
     var fovMultiplier = true
     var soundEffect = true
@@ -86,9 +86,6 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         EntityRendererRegistry.init()
         GrappleKey.registerAll()
         GrappleModUtils.init()
-        Speedlines.initClient()
-        WebShooter.initClient()
-        MouseListener.initClient()
     }
 
     override fun onInitializeServer() {
@@ -96,4 +93,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
     }
 
     fun String.toId() = Identifier("examplemod", this)
+
+    override val hero: Hero<*>
+        get() = Spiderman
 }

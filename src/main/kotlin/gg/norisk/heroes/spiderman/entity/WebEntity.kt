@@ -40,6 +40,7 @@ import net.silkmc.silk.core.text.broadcastText
 import java.util.*
 import kotlin.random.Random
 
+//TODO animation / transformation und spidy sense
 
 class WebEntity : ThrownItemEntity {
     var originPos: Vec3d = pos
@@ -152,7 +153,6 @@ class WebEntity : ThrownItemEntity {
 
     override fun onRemoved() {
         super.onRemoved()
-        server?.broadcastText("Removed $this")
         (owner as? PlayerEntity?)?.isSwinging = false
     }
 

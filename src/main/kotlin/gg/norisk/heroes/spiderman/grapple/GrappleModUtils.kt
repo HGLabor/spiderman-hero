@@ -1,7 +1,8 @@
 package gg.norisk.heroes.spiderman.grapple
 
+import gg.norisk.heroes.common.events.afterTickInputEvent
+import gg.norisk.heroes.common.events.keyEvent
 import gg.norisk.heroes.spiderman.Manager.toId
-import gg.norisk.heroes.spiderman.event.Events
 import gg.norisk.heroes.spiderman.util.Vec
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.network.ClientPlayerEntity
@@ -10,7 +11,6 @@ import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.hit.HitResult
 import net.minecraft.world.RaycastContext
 import net.minecraft.world.World
-import net.silkmc.silk.core.text.literal
 import net.silkmc.silk.network.packet.c2sPacket
 
 /*
@@ -52,7 +52,7 @@ object GrappleModUtils {
         }
 
         //Double Press Key Logic maybe move?
-        Events.keyEvent.listen {
+        keyEvent.listen {
             //TODO maybe resetten wenn action == 2 also gedrückt halten
             if (it.client.options.jumpKey.matchesKey(it.key, it.scanCode) && it.action == 1) {
                 val currentTime = System.currentTimeMillis()
@@ -66,12 +66,10 @@ object GrappleModUtils {
             }
         }
 
-        Events.afterTickInputEvent.listen {
+        afterTickInputEvent.listen {
             if (controller != null) {
                 controller?.receivePlayerMovementMessage(
-                    it.input.movementSideways,
-                    it.input.movementForward,
-                    it.input.sneaking
+                    it.input.movementSideways, it.input.movementForward, it.input.sneaking
                 )
                 it.input.sneaking = false
                 it.input.jumping = false
