@@ -5,7 +5,6 @@ import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils.webEntityDiscardPacket
 import gg.norisk.heroes.spiderman.grapple.GrapplingHookPhysicsController
 import gg.norisk.heroes.spiderman.grapple.RopeSegmentHandler
-import gg.norisk.heroes.spiderman.player.gravity
 import gg.norisk.heroes.spiderman.player.isSwinging
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.sound.FlyingSoundInstance
@@ -36,7 +35,6 @@ import net.silkmc.silk.core.entity.modifyVelocity
 import net.silkmc.silk.core.kotlin.ticks
 import net.silkmc.silk.core.math.geometry.filledSpherePositionSet
 import net.silkmc.silk.core.task.mcCoroutineTask
-import net.silkmc.silk.core.text.broadcastText
 import java.util.*
 import kotlin.random.Random
 
@@ -395,30 +393,5 @@ class WebEntity : ThrownItemEntity {
 
             this.setPos(newpos.x, newpos.y, newpos.z)
         }*/
-    }
-
-    fun applySwingMotion(player: PlayerEntity, world: World, anchorPoint: Vec3d) {
-        val playerPosition = player.pos
-        val ropeVector = anchorPoint.subtract(playerPosition)
-        val ropeLength = ropeVector.length()
-        val swingAngle = Math.atan2(ropeVector.y, Math.sqrt(ropeVector.x * ropeVector.x + ropeVector.z * ropeVector.z))
-
-        // Berechne die Schwerkraftkomponenten
-        val gravity = Vec3d(0.0, player.gravity.toDouble(), 0.0)
-        val gravityParallel = Math.cos(swingAngle) * gravity.y
-        val gravityPerpendicular = Math.sin(swingAngle) * gravity.y
-
-        // Berechne die Zentrifugalkraft
-        val playerVelocity = player.velocity
-        val centrifugalForceMagnitude = (playerVelocity.lengthSquared() / ropeLength)
-        val centrifugalForceDirection = ropeVector.crossProduct(Vec3d(0.0, 1.0, 0.0)).normalize()
-        val centrifugalForce = centrifugalForceDirection.multiply(centrifugalForceMagnitude)
-
-        // Neue Geschwindigkeit des Spielers berechnen
-        val newVelocity =
-            playerVelocity.add(Vec3d(0.0, gravityParallel + gravityPerpendicular, 0.0)).add(centrifugalForce)
-
-        // Aktualisiere die Spieler-Geschwindigkeit
-        player.modifyVelocity(newVelocity)
     }
 }

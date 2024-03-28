@@ -10,21 +10,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
     public LivingEntityMixin(EntityType<?> entityType, World world) {
         super(entityType, world);
-    }
-
-    @ModifyConstant(method = "travel", constant = @Constant(doubleValue = 0.08))
-    private double injected(double constant) {
-        if ((Object) this instanceof PlayerEntity player) {
-            return SpidermanPlayerKt.getGravity(player);
-        }
-        return constant;
     }
 
     @ModifyExpressionValue(

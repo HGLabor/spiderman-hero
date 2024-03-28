@@ -1,7 +1,7 @@
 package gg.norisk.heroes.spiderman.mixin.client.render.entity;
 
 import gg.norisk.heroes.spiderman.entity.WebEntity;
-import gg.norisk.heroes.spiderman.movement.LeadRenderer;
+import gg.norisk.heroes.spiderman.render.LeadRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;

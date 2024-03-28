@@ -1,9 +1,7 @@
-package gg.norisk.heroes.spiderman.movement
+package gg.norisk.heroes.spiderman.render
 
 import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.player.isSwinging
-import gg.norisk.heroes.spiderman.player.setLeashTarget
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.LightmapTextureManager
 import net.minecraft.client.render.RenderLayer
@@ -11,8 +9,6 @@ import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityType
-import net.minecraft.entity.SpawnReason
 import net.minecraft.entity.mob.MobEntity
 import net.minecraft.entity.passive.BatEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -21,48 +17,12 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.LightType
-import net.silkmc.silk.commands.command
 import net.silkmc.silk.core.text.literal
 import org.joml.Matrix4f
 import kotlin.math.cos
 import kotlin.math.sin
 
 object LeadRenderer {
-    fun init() {
-        if (FabricLoader.getInstance().isDevelopmentEnvironment) {
-            command("leadtest") {
-                runs {
-                    val player = this.source.playerOrThrow
-                    val world = player.serverWorld
-                    val web = EntityType.BAT.spawn(world, player.blockPos.add(0, 5, 0), SpawnReason.COMMAND)
-                        ?: return@runs
-                    web.attachLeash(player, true)
-                    web.setNoGravity(false)
-                    web.customName = "Web".literal
-                    web.isCustomNameVisible = true
-                    web.isAiDisabled = true
-
-
-                    val bat = EntityType.BAT.spawn(world, player.blockPos.add(0, 5, 3), SpawnReason.COMMAND)
-                        ?: return@runs
-                    bat.attachLeash(player, true)
-                    bat.isAiDisabled = true
-                    bat.setNoGravity(false)
-                    bat.customName = "Bat".literal
-                    bat.isCustomNameVisible = true
-                }
-            }
-            command("leadtest2") {
-                runs {
-                    val player = this.source.playerOrThrow
-                    val world = player.serverWorld
-                    val bat = EntityType.BAT.spawn(world, player.blockPos.add(0, 5, 3), SpawnReason.COMMAND)
-                        ?: return@runs
-                    player.setLeashTarget(bat)
-                }
-            }
-        }
-    }
 
     fun <T : MobEntity, E : Entity> checkForSpidermanLeash(mobEntity: T, entity: E): Boolean {
         if (entity is PlayerEntity && mobEntity is BatEntity && mobEntity.customName == "Bat".literal) {

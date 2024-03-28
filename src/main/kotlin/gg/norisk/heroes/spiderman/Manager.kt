@@ -6,12 +6,8 @@ import gg.norisk.heroes.spiderman.abilities.WebShooter
 import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.grapple.GrappleKey
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
-import gg.norisk.heroes.spiderman.movement.LeadRenderer
-import gg.norisk.heroes.spiderman.movement.PendulumMovement
-import gg.norisk.heroes.spiderman.movement.PullMovement
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.registry.EntityRendererRegistry
-import gg.norisk.heroes.spiderman.registry.ItemRegistry
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.api.ModInitializer
@@ -33,11 +29,7 @@ object Manager : HeroInitializer(), ModInitializer, DedicatedServerModInitialize
 
     override fun onInitialize() {
         // Common initialization
-        ItemRegistry.init()
         EntityRegistry.init()
-        PendulumMovement.initialize()
-        LeadRenderer.init()
-        PullMovement.init()
 
         WebShooter.initServer()
         WebShooter.initCommon()
