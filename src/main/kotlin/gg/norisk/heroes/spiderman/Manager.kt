@@ -7,7 +7,6 @@ import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.grapple.GrappleKey
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
 import gg.norisk.heroes.spiderman.movement.LeadRenderer
-import gg.norisk.heroes.spiderman.movement.Parabel
 import gg.norisk.heroes.spiderman.movement.PendulumMovement
 import gg.norisk.heroes.spiderman.movement.PullMovement
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
@@ -39,7 +38,6 @@ object Manager : HeroInitializer(), ModInitializer, DedicatedServerModInitialize
         PendulumMovement.initialize()
         LeadRenderer.init()
         PullMovement.init()
-        Parabel.init()
 
         WebShooter.initServer()
         WebShooter.initCommon()

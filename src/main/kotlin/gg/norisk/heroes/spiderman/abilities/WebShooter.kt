@@ -7,24 +7,11 @@ import gg.norisk.heroes.spiderman.entity.WebEntity.Companion.getWeb
 import gg.norisk.heroes.spiderman.event.Events.entityCanClimbOnEvent
 import gg.norisk.heroes.spiderman.player.isSpiderman
 import gg.norisk.heroes.spiderman.player.playGenericSpidermanSound
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.minecraft.block.Blocks
-import net.minecraft.client.option.KeyBinding
-import net.minecraft.client.util.InputUtil
 import net.minecraft.entity.player.PlayerEntity
 import net.silkmc.silk.network.packet.ServerPacketContext
-import org.lwjgl.glfw.GLFW
 
 object WebShooter {
-    val webShooterKey = KeyBindingHelper.registerKeyBinding(
-        KeyBinding(
-            "key.spiderman.webshooter",
-            InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_G,
-            "category.spiderman.abilities"
-        )
-    )
-
     fun initServer() {
         mousePacket.receiveOnServer(::onMousePacket)
         mouseScrollPacket.receiveOnServer(::onMouseScrollPacket)
