@@ -4,10 +4,7 @@ import gg.norisk.heroes.common.hero.ability.implementation.PressAbility
 import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.player.playGenericSpidermanSound
 import net.fabricmc.api.EnvType
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.client.option.KeyBinding
-import net.minecraft.client.util.InputUtil
 import net.minecraft.item.Items
 import net.minecraft.server.network.ServerPlayerEntity
 import net.silkmc.silk.core.text.literal
@@ -17,14 +14,7 @@ val WebShoot by PressAbility("WebShoot", 20) {
 
     //TODO GENERISCH
     if (FabricLoader.getInstance().environmentType == EnvType.CLIENT) {
-        keyBind = KeyBindingHelper.registerKeyBinding(
-            KeyBinding(
-                "key.spiderman.webshooter",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_G,
-                "category.spiderman.abilities"
-            )
-        )
+        keyBindCode = GLFW.GLFW_KEY_G
     }
 
     handle {
