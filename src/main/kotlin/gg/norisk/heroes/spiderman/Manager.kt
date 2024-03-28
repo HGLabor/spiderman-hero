@@ -31,7 +31,6 @@ object Manager : HeroInitializer(), ModInitializer, DedicatedServerModInitialize
         // Common initialization
         EntityRegistry.init()
 
-        WebShooter.initServer()
         WebShooter.initCommon()
         WebEntity.initServer()
 
