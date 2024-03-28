@@ -1,5 +1,6 @@
 package gg.norisk.heroes.spiderman.entity
 
+import gg.norisk.heroes.common.sound.FlyingSoundInstance
 import gg.norisk.heroes.spiderman.Manager
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils.webEntityDiscardPacket
@@ -7,7 +8,6 @@ import gg.norisk.heroes.spiderman.grapple.GrapplingHookPhysicsController
 import gg.norisk.heroes.spiderman.grapple.RopeSegmentHandler
 import gg.norisk.heroes.spiderman.player.isSwinging
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
-import gg.norisk.heroes.spiderman.sound.FlyingSoundInstance
 import gg.norisk.heroes.spiderman.util.Vec
 import kotlinx.coroutines.Job
 import net.minecraft.block.Blocks

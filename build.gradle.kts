@@ -47,7 +47,7 @@ dependencies {
     modImplementation("net.silkmc:silk-commands:$silkVersion")
     modImplementation("net.silkmc:silk-network:$silkVersion")
 
-    modImplementation("gg.norisk:hero-api:$mcVersion-1.0.49-SNAPSHOT")
+    modImplementation("gg.norisk:hero-api:$mcVersion-1.0.50-SNAPSHOT")
     modImplementation("de.hglabor:notify:1.2.2")
 }
 
