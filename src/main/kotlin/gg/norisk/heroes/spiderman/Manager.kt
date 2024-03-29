@@ -27,6 +27,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.Blocks
 import net.minecraft.client.MinecraftClient
+import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 import net.minecraft.util.Identifier
@@ -98,16 +100,12 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                 this.source.server.setDifficulty(Difficulty.PEACEFUL, false)
                 val player = this.source.playerOrThrow
                 player.inventory.clear()
+                player.giveItemStack(ItemStack(Items.COBWEB, 64))
                 player.isSpiderman = !player.isSpiderman
                 if (player.isSpiderman) {
 
                     player.serverWorld.playSoundFromEntity(
-                        null,
-                        player,
-                        SoundRegistry.SPIDERMAN,
-                        SoundCategory.PLAYERS,
-                        0.8f,
-                        1f
+                        null, player, SoundRegistry.SPIDERMAN, SoundCategory.PLAYERS, 0.8f, 1f
                     )
 
                     AnimationManager.broadcastAnimation(player, "spiderman")
@@ -115,12 +113,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                     mcCoroutineTask(delay = 4.5.seconds) {
                         AnimationManager.broadcastResetAnimation(player)
                         player.serverWorld.playSoundFromEntity(
-                            null,
-                            player,
-                            SoundEvents.ENTITY_VILLAGER_NO,
-                            SoundCategory.PLAYERS,
-                            0.8f,
-                            1f
+                            null, player, SoundEvents.ENTITY_VILLAGER_NO, SoundCategory.PLAYERS, 0.8f, 1f
                         )
                     }
                 }
