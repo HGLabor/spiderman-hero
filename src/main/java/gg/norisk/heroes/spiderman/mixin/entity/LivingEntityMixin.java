@@ -27,13 +27,18 @@ public abstract class LivingEntityMixin extends Entity {
         return constant;
     }
 
-    @ModifyExpressionValue(
-            method = "isClimbing",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z")
-    )
+    @ModifyExpressionValue(method = "isClimbing", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;isIn(Lnet/minecraft/registry/tag/TagKey;)Z"))
     private boolean onlyClimbIfAllowed(boolean original) {
         if ((LivingEntity) (Object) this instanceof PlayerEntity player && SpidermanPlayerKt.isSpiderman(player) && this.getBlockStateAtPos().isOf(Blocks.COBWEB)) {
             return true;
+        }
+        return original;
+    }
+
+    @ModifyExpressionValue(method = "handleFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;computeFallDamage(FF)I"))
+    private int onlyClimbIfAllowed(int original) {
+        if ((LivingEntity) (Object) this instanceof PlayerEntity player && SpidermanPlayerKt.isSpiderman(player)) {
+            return original / 2;
         }
         return original;
     }

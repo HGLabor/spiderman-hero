@@ -2,6 +2,7 @@ package gg.norisk.heroes.spiderman
 
 import gg.norisk.heroes.spiderman.abilities.WebShooter
 import gg.norisk.heroes.spiderman.entity.WebEntity
+import gg.norisk.heroes.spiderman.entity.WebEntity.Companion.getWeb
 import gg.norisk.heroes.spiderman.grapple.GrappleKey
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
 import gg.norisk.heroes.spiderman.movement.LeadRenderer
@@ -9,15 +10,20 @@ import gg.norisk.heroes.spiderman.movement.Parabel
 import gg.norisk.heroes.spiderman.movement.PendulumMovement
 import gg.norisk.heroes.spiderman.movement.PullMovement
 import gg.norisk.heroes.spiderman.network.MouseListener
+import gg.norisk.heroes.spiderman.player.isSpiderman
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
 import gg.norisk.heroes.spiderman.registry.EntityRendererRegistry
 import gg.norisk.heroes.spiderman.registry.ItemRegistry
+import gg.norisk.heroes.spiderman.render.Ability
+import gg.norisk.heroes.spiderman.render.AbilityRenderer
 import gg.norisk.heroes.spiderman.render.Speedlines
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.client.MinecraftClient
 import net.minecraft.util.Identifier
 import net.minecraft.world.Difficulty
 import net.minecraft.world.GameRules
@@ -54,6 +60,13 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
             }
         })
 
+        command("spiderman") {
+            runs {
+                val player = this.source.playerOrThrow
+                player.isSpiderman = !player.isSpiderman
+            }
+        }
+
         if (FabricLoader.getInstance().isDevelopmentEnvironment) {
             command("visuell") {
                 literal("fovmultiplier") {
@@ -89,6 +102,60 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         Speedlines.initClient()
         WebShooter.initClient()
         MouseListener.initClient()
+        AbilityRenderer.init()
+
+        ClientLifecycleEvents.CLIENT_STARTED.register {
+            AbilityRenderer.abilities += Ability(WebShooter.webShooterKey, { it.isSpiderman }, { "Web Shooter" })
+            AbilityRenderer.abilities += Ability(MinecraftClient.getInstance().options.pickItemKey, {
+                return@Ability it.getWeb() != null && it.isSpiderman
+            }, { "Netzgröße" }, keyText = "Scroll"
+            )
+            AbilityRenderer.abilities += Ability(
+                MinecraftClient.getInstance().options.pickItemKey,
+                {
+                    return@Ability it.getWeb() != null && it.isSpiderman
+                },
+                { "Spinnennetz" },
+            )
+            AbilityRenderer.abilities += Ability(
+                MinecraftClient.getInstance().options.attackKey,
+                {
+                    val web = it.getWeb() ?: return@Ability false
+                    return@Ability web.hasVehicle() && it.isSpiderman
+                },
+                { "Ziehen" },
+            )
+            AbilityRenderer.abilities += Ability(
+                MinecraftClient.getInstance().options.useKey,
+                {
+                    val web = it.getWeb() ?: return@Ability false
+                    return@Ability web.hasVehicle() && it.isSpiderman
+                },
+                { "Grapple" },
+            )
+            AbilityRenderer.abilities += Ability(
+                MinecraftClient.getInstance().options.jumpKey,
+                {
+                    val web = it.getWeb() ?: return@Ability false
+                    return@Ability web.isCollided && it.isSpiderman
+                },
+                { "Netz Länger" },
+            )
+            AbilityRenderer.abilities += Ability(
+                MinecraftClient.getInstance().options.sneakKey,
+                {
+                    val web = it.getWeb() ?: return@Ability false
+                    return@Ability web.isCollided && it.isSpiderman
+                },
+                { "Netz Kürzer" },
+            )
+            AbilityRenderer.abilities += Ability(MinecraftClient.getInstance().options.jumpKey, {
+                val web = it.getWeb() ?: return@Ability false
+                return@Ability web.isCollided && it.isSpiderman
+            }, { "Absprung" }, prefix = "2x ".literal
+            )
+        }
+
     }
 
     override fun onInitializeServer() {

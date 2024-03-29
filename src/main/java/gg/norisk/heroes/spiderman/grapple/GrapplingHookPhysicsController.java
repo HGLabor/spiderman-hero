@@ -174,6 +174,8 @@ public class GrapplingHookPhysicsController {
         }
     }
 
+    public static boolean flag = false;
+
     public void transmitServerPhysicsUpdate() {
         if (!this.isControllerActive)
             return;
@@ -259,6 +261,10 @@ public class GrapplingHookPhysicsController {
                 if (oldspherevec.length() - remainingLength > GrappleSettings.INSTANCE.getRope_snap_buffer()) {
                     // if rope is too long, the rope snaps
 
+                    if (!flag) {
+                        flag = true;
+                        entity.sendMessage(Text.of("Du kannst nur an höheren Positionen oder Entities anhaften"));
+                    }
                     this.disable();
                     this.updateServerPos();
                     return;

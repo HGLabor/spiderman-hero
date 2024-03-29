@@ -13,6 +13,7 @@ import gg.norisk.heroes.spiderman.util.Vec
 import kotlinx.coroutines.Job
 import net.minecraft.block.Blocks
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.network.AbstractClientPlayerEntity
 import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.entity.*
 import net.minecraft.entity.data.DataTracker
@@ -73,6 +74,11 @@ class WebEntity : ThrownItemEntity {
             }
         }
 
+        fun AbstractClientPlayerEntity.getWeb(): WebEntity? {
+            return clientWorld.entities
+                .filterIsInstance<WebEntity>().firstOrNull { it.ownerId == this.uuid }
+        }
+
         fun ServerPlayerEntity.getWeb(): WebEntity? {
             return serverWorld.iterateEntities()
                 .filterIsInstance<WebEntity>().firstOrNull { it.ownerId == this.uuid }
@@ -131,6 +137,7 @@ class WebEntity : ThrownItemEntity {
 
     override fun onCollision(hitResult: HitResult) {
         super.onCollision(hitResult)
+        println("Hit Result: ${hitResult.type} ${hitResult.pos}")
         if (hitResult is EntityHitResult) {
         } else {
             isCollided = true
