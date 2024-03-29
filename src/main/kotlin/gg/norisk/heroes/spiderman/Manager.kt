@@ -37,6 +37,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
     var soundEffect = true
     var cameraOffset = true
     var speedlines = true
+    val spidermanSkin = "spiderman-skin.png".toId()
 
     override fun onInitialize() {
         // Common initialization

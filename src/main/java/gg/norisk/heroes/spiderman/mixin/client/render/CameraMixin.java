@@ -1,8 +1,10 @@
 package gg.norisk.heroes.spiderman.mixin.client.render;
 
 import gg.norisk.heroes.spiderman.Manager;
+import gg.norisk.heroes.spiderman.player.SpidermanPlayerKt;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,8 +66,10 @@ public abstract class CameraMixin {
         var velocity = entity.getVelocity().length();
         var length = 2.0 + velocity * 3;
         lerpedLength = MathHelper.lerp((delta * 0.2), lerpedLength, length);
-        if (Manager.INSTANCE.getCameraOffset()) {
-            args.set(0, -this.clipToSpace(lerpedLength));
+        if (entity instanceof PlayerEntity player && SpidermanPlayerKt.isSpiderman(player)) {
+            if (Manager.INSTANCE.getCameraOffset()) {
+                args.set(0, -this.clipToSpace(lerpedLength));
+            }
         }
         //TODO geilen wert finden TODO
     }

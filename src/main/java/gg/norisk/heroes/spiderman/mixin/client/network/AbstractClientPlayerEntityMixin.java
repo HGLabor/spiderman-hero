@@ -2,6 +2,7 @@ package gg.norisk.heroes.spiderman.mixin.client.network;
 
 import com.mojang.authlib.GameProfile;
 import gg.norisk.heroes.spiderman.Manager;
+import gg.norisk.heroes.spiderman.player.SpidermanPlayerKt;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -20,14 +21,15 @@ public abstract class AbstractClientPlayerEntityMixin extends PlayerEntity {
     @ModifyArgs(method = "getFovMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
     private void injected(Args args) {
         if (!Manager.INSTANCE.getFovMultiplier()) return;
+        if (SpidermanPlayerKt.isSpiderman(this)) {
+            float f = args.get(2);
 
-        float f = args.get(2);
+            //TODO anpassen
+            if (this.getVelocity().length() > 0.5) {
+                f *= (float) Math.min(1.5, this.getVelocity().length() * 2);
+            }
 
-        //TODO anpassen
-        if (this.getVelocity().length() > 0.5) {
-            f *= (float) Math.min(1.5, this.getVelocity().length() * 2);
+            args.set(2, f);
         }
-
-        args.set(2, f);
     }
 }
