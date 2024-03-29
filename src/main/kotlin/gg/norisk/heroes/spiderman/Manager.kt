@@ -1,6 +1,7 @@
 package gg.norisk.heroes.spiderman
 
 import gg.norisk.heroes.spiderman.abilities.WebShooter
+import gg.norisk.heroes.spiderman.animations.AnimationManager
 import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.entity.WebEntity.Companion.getWeb
 import gg.norisk.heroes.spiderman.grapple.GrappleKey
@@ -17,6 +18,7 @@ import gg.norisk.heroes.spiderman.registry.ItemRegistry
 import gg.norisk.heroes.spiderman.render.Ability
 import gg.norisk.heroes.spiderman.render.AbilityRenderer
 import gg.norisk.heroes.spiderman.render.Speedlines
+import gg.norisk.heroes.spiderman.sound.SoundRegistry
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.api.ModInitializer
@@ -24,12 +26,15 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.MinecraftClient
+import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import net.minecraft.world.Difficulty
 import net.minecraft.world.GameRules
 import net.silkmc.silk.commands.command
+import net.silkmc.silk.core.task.mcCoroutineTask
 import net.silkmc.silk.core.text.literal
 import org.apache.logging.log4j.LogManager
+import kotlin.time.Duration.Companion.seconds
 
 object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitializer {
     val logger = LogManager.getLogger("spiderman-hero")
@@ -47,6 +52,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         LeadRenderer.init()
         PullMovement.init()
         Parabel.init()
+        AnimationManager.init()
 
         WebShooter.initServer()
         WebShooter.initCommon()
@@ -70,6 +76,23 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                 val player = this.source.playerOrThrow
                 player.inventory.clear()
                 player.isSpiderman = !player.isSpiderman
+                if (player.isSpiderman) {
+
+                    player.serverWorld.playSoundFromEntity(
+                        null,
+                        player,
+                        SoundRegistry.SPIDERMAN,
+                        SoundCategory.PLAYERS,
+                        0.4f,
+                        1f
+                    )
+
+                    AnimationManager.broadcastAnimation(player, "spiderman")
+
+                    mcCoroutineTask(delay = 2.seconds) {
+                        AnimationManager.broadcastResetAnimation(player)
+                    }
+                }
             }
         }
 
@@ -145,7 +168,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                     val web = it.getWeb() ?: return@Ability false
                     return@Ability web.isCollided && it.isSpiderman
                 },
-                { "Netz Länger" },
+                { "Netz Kürzer" },
             )
             AbilityRenderer.abilities += Ability(
                 MinecraftClient.getInstance().options.sneakKey,
@@ -153,7 +176,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                     val web = it.getWeb() ?: return@Ability false
                     return@Ability web.isCollided && it.isSpiderman
                 },
-                { "Netz Kürzer" },
+                { "Netz Länger" },
             )
             AbilityRenderer.abilities += Ability(MinecraftClient.getInstance().options.jumpKey, {
                 val web = it.getWeb() ?: return@Ability false

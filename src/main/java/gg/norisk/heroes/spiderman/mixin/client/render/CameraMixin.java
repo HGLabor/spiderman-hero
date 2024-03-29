@@ -1,6 +1,7 @@
 package gg.norisk.heroes.spiderman.mixin.client.render;
 
 import gg.norisk.heroes.spiderman.Manager;
+import gg.norisk.heroes.spiderman.player.IAnimatedPlayer;
 import gg.norisk.heroes.spiderman.player.SpidermanPlayerKt;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -67,7 +68,8 @@ public abstract class CameraMixin {
         var length = 2.0 + velocity * 3;
         lerpedLength = MathHelper.lerp((delta * 0.2), lerpedLength, length);
         if (entity instanceof PlayerEntity player && SpidermanPlayerKt.isSpiderman(player)) {
-            if (Manager.INSTANCE.getCameraOffset()) {
+            if (Manager.INSTANCE.getCameraOffset() && ((IAnimatedPlayer) player).hero_getModAnimation().getAnimation() == null
+            ) {
                 args.set(0, -this.clipToSpace(lerpedLength));
             }
         }

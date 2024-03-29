@@ -13,6 +13,7 @@ version = "1.0.0"
 
 repositories {
     mavenCentral()
+    maven("https://maven.kosmx.dev/")
 }
 
 dependencies {
@@ -25,6 +26,7 @@ dependencies {
     modImplementation("net.silkmc:silk-core:$silkVersion")
     modImplementation("net.silkmc:silk-commands:$silkVersion")
     modImplementation("net.silkmc:silk-network:$silkVersion")
+    include(modImplementation("dev.kosmx.player-anim:player-animation-lib-fabric:1.0.2-rc1+1.20")!!)
 }
 
 tasks {
