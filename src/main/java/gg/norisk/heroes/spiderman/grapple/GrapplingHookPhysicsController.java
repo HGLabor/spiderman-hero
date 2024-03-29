@@ -51,7 +51,7 @@ public class GrapplingHookPhysicsController {
     protected int onGroundTimer;
     protected int maxOnGroundTimer = 3;
 
-    protected double maxLen = 60;
+    protected double maxLen = 90;
 
     protected double playerMovementMult = 1;
 

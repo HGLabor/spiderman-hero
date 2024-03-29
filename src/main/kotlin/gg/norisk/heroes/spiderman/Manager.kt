@@ -25,16 +25,21 @@ import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.block.Blocks
 import net.minecraft.client.MinecraftClient
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.Vec3i
 import net.minecraft.world.Difficulty
 import net.minecraft.world.GameRules
 import net.silkmc.silk.commands.command
+import net.silkmc.silk.core.math.geometry.circlePositionSet
+import net.silkmc.silk.core.math.geometry.filledSpherePositionSet
 import net.silkmc.silk.core.task.mcCoroutineTask
 import net.silkmc.silk.core.text.literal
 import org.apache.logging.log4j.LogManager
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitializer {
@@ -68,6 +73,22 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                 it.gameRules.get(GameRules.DO_WEATHER_CYCLE).set(false, it)
             }
         })
+
+        command("swingvorlage") {
+            runs {
+                val player = this.source.playerOrThrow
+                player.sendMessage("Generating Swing Vorlage...".literal)
+                repeat(Random.nextInt(10, 30)) {
+                    for (blockPos in Vec3i(
+                        player.blockX + Random.nextInt(-100, 100),
+                        Random.nextInt(80, 200),
+                        player.blockZ + Random.nextInt(-100, 100)
+                    ).filledSpherePositionSet(Random.nextInt(2, 10))) {
+                        player.world.setBlockState(blockPos, Blocks.BEDROCK.defaultState)
+                    }
+                }
+            }
+        }
 
         command("spiderman") {
             runs {
