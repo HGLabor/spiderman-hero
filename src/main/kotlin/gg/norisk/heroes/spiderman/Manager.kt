@@ -27,6 +27,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.MinecraftClient
 import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvents
 import net.minecraft.util.Identifier
 import net.minecraft.world.Difficulty
 import net.minecraft.world.GameRules
@@ -46,6 +47,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
 
     override fun onInitialize() {
         // Common initialization
+        SoundRegistry.init()
         ItemRegistry.init()
         EntityRegistry.init()
         PendulumMovement.initialize()
@@ -83,14 +85,22 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                         player,
                         SoundRegistry.SPIDERMAN,
                         SoundCategory.PLAYERS,
-                        0.4f,
+                        0.8f,
                         1f
                     )
 
                     AnimationManager.broadcastAnimation(player, "spiderman")
 
-                    mcCoroutineTask(delay = 2.seconds) {
+                    mcCoroutineTask(delay = 4.5.seconds) {
                         AnimationManager.broadcastResetAnimation(player)
+                        player.serverWorld.playSoundFromEntity(
+                            null,
+                            player,
+                            SoundEvents.ENTITY_VILLAGER_NO,
+                            SoundCategory.PLAYERS,
+                            0.8f,
+                            1f
+                        )
                     }
                 }
             }
