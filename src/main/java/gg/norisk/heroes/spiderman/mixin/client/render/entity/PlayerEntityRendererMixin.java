@@ -26,11 +26,4 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     private void renderInjection(AbstractClientPlayerEntity abstractClientPlayerEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
         //LeadRenderer.INSTANCE.renderLeash(g, matrixStack, vertexConsumerProvider, abstractClientPlayerEntity);
     }
-
-    @Inject(method = "getTexture(Lnet/minecraft/client/network/AbstractClientPlayerEntity;)Lnet/minecraft/util/Identifier;", at = @At("RETURN"), cancellable = true)
-    private void injected(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfoReturnable<Identifier> cir) {
-        if (SpidermanPlayerKt.isSpiderman(abstractClientPlayerEntity)) {
-            cir.setReturnValue(Manager.INSTANCE.getSpidermanSkin());
-        }
-    }
 }

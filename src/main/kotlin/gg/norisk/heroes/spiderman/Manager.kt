@@ -63,7 +63,12 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
 
         command("spiderman") {
             runs {
+                this.source.world.gameRules.get(GameRules.DO_DAYLIGHT_CYCLE).set(false, this.source.server)
+                this.source.world.gameRules.get(GameRules.DO_WEATHER_CYCLE).set(false, this.source.server)
+                this.source.world.timeOfDay = 6000
+                this.source.server.setDifficulty(Difficulty.PEACEFUL, false)
                 val player = this.source.playerOrThrow
+                player.inventory.clear()
                 player.isSpiderman = !player.isSpiderman
             }
         }

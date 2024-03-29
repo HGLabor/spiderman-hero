@@ -38,7 +38,7 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyExpressionValue(method = "handleFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;computeFallDamage(FF)I"))
     private int onlyClimbIfAllowed(int original) {
         if ((LivingEntity) (Object) this instanceof PlayerEntity player && SpidermanPlayerKt.isSpiderman(player)) {
-            return original / 4;
+            return original / 6;
         }
         return original;
     }
