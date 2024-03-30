@@ -109,6 +109,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
 
                     mcCoroutineTask(delay = 4.5.seconds) {
                         AnimationManager.broadcastResetAnimation(player)
+                        player.sendMessage("Tipp: /swingvorlage um schön zu schwingen... ;)".literal)
                         player.serverWorld.playSoundFromEntity(
                             null, player, SoundEvents.ENTITY_VILLAGER_NO, SoundCategory.PLAYERS, 0.8f, 1f
                         )

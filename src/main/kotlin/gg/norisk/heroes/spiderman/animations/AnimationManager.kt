@@ -8,6 +8,7 @@ import gg.norisk.heroes.spiderman.Manager.toId
 import gg.norisk.heroes.spiderman.player.IAnimatedPlayer
 import kotlinx.serialization.ExperimentalSerializationApi
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.option.Perspective
 import net.minecraft.entity.player.PlayerEntity
 import net.silkmc.silk.network.packet.c2sPacket
 import net.silkmc.silk.network.packet.s2cPacket
@@ -62,8 +63,11 @@ object AnimationManager {
         val builder = anim.mutableCopy()
         anim = builder.build()
 
+        if (animation.equals("spiderman")) {
+            MinecraftClient.getInstance().options.perspective = Perspective.THIRD_PERSON_FRONT
+        }
+
         //TODO das muss geiler gemacht werden ist jetzt nur für Darth Vader in THird Person
-        println(animation.startsWith("sword"))
         animationContainer.replaceAnimationWithFade(
             AbstractFadeModifier.standardFadeIn(3, Ease.INBOUNCE),
             NamedKeyframeAnimationPlayer(animation, anim).setFirstPersonMode(
