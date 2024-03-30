@@ -282,7 +282,7 @@ public class GrapplingHookPhysicsController {
 
             // handle keyboard input (jumping and climbing)
             if (entity instanceof PlayerEntity player) {
-                boolean detachKeyDown = GrappleKey.DETACH.isPressed();
+                boolean detachKeyDown = false;
                 boolean isJumping = detachKeyDown && !this.playerJump;
                 this.playerJump = detachKeyDown;
 
@@ -295,7 +295,7 @@ public class GrapplingHookPhysicsController {
                     }*/
                 }
 
-                if (GrappleKey.DAMPEN_SWING.isPressed()) {
+                if (false) {
                     // slow down
                     Vec motiontorwards = spherevec.withMagnitude(-0.1);
                     motiontorwards = new Vec(motiontorwards.x, 0, motiontorwards.z);
@@ -308,7 +308,7 @@ public class GrapplingHookPhysicsController {
 
                 }
 
-                if ((GrappleKey.CLIMB.isPressed() || MinecraftClient.getInstance().options.jumpKey.isPressed() || MinecraftClient.getInstance().options.sneakKey.isPressed()) /*&& !motor*/) {
+                if ((MinecraftClient.getInstance().options.jumpKey.isPressed() || MinecraftClient.getInstance().options.sneakKey.isPressed()) /*&& !motor*/) {
                     Vec climbMotion = anchor.y != playerPos.y
                             ? this.calculateClimbingMotion(hookEntity, playerToAnchorDist, distToAnchor, spherevec)
                             : new Vec(0, 0, 0);
@@ -366,7 +366,7 @@ public class GrapplingHookPhysicsController {
         // climb up/down rope
         double climbDelta = 0;
 
-        if (GrappleKey.CLIMB.isPressed()) {
+        if (false) {
             climbDelta = this.playerForward;
 
             if (GrappleModUtils.INSTANCE.isMovingSlowly(this.entity))

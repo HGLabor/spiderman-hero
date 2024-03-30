@@ -217,7 +217,7 @@ public class RopeSegmentHandler {
             Vec bound_option2 = linePlaneIntersection(top, prevtop, cornerbound1, bottomnormal);
             Vec bound_option3 = linePlaneIntersection(prevbottom, bottom, cornerbound1, bottomnormal);
 
-            for (Vec cornerbound2 : new Vec[]{bound_option1, bound_option2, bound_option3}) {
+           /* for (Vec cornerbound2 : new Vec[]{bound_option1, bound_option2, bound_option3}) {
                 if (cornerbound2 == null) {
                     continue;
                 }
@@ -269,7 +269,7 @@ public class RopeSegmentHandler {
                         break;
                     }
                 }
-            }
+            } */
         }
     }
 

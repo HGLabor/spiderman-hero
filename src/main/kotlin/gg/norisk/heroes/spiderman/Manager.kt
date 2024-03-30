@@ -4,12 +4,10 @@ import gg.norisk.heroes.spiderman.abilities.WebShooter
 import gg.norisk.heroes.spiderman.animations.AnimationManager
 import gg.norisk.heroes.spiderman.entity.WebEntity
 import gg.norisk.heroes.spiderman.entity.WebEntity.Companion.getWeb
-import gg.norisk.heroes.spiderman.grapple.GrappleKey
 import gg.norisk.heroes.spiderman.grapple.GrappleModUtils
 import gg.norisk.heroes.spiderman.movement.LeadRenderer
 import gg.norisk.heroes.spiderman.movement.Parabel
 import gg.norisk.heroes.spiderman.movement.PendulumMovement
-import gg.norisk.heroes.spiderman.movement.PullMovement
 import gg.norisk.heroes.spiderman.network.MouseListener
 import gg.norisk.heroes.spiderman.player.isSpiderman
 import gg.norisk.heroes.spiderman.registry.EntityRegistry
@@ -36,7 +34,6 @@ import net.minecraft.util.math.Vec3i
 import net.minecraft.world.Difficulty
 import net.minecraft.world.GameRules
 import net.silkmc.silk.commands.command
-import net.silkmc.silk.core.math.geometry.circlePositionSet
 import net.silkmc.silk.core.math.geometry.filledSpherePositionSet
 import net.silkmc.silk.core.task.mcCoroutineTask
 import net.silkmc.silk.core.text.literal
@@ -59,7 +56,6 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
         EntityRegistry.init()
         PendulumMovement.initialize()
         LeadRenderer.init()
-        PullMovement.init()
         Parabel.init()
         AnimationManager.init()
 
@@ -80,11 +76,11 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
             runs {
                 val player = this.source.playerOrThrow
                 player.sendMessage("Generating Swing Vorlage...".literal)
-                repeat(Random.nextInt(10, 30)) {
+                repeat(Random.nextInt(10, 50)) {
                     for (blockPos in Vec3i(
-                        player.blockX + Random.nextInt(-100, 100),
-                        Random.nextInt(80, 200),
-                        player.blockZ + Random.nextInt(-100, 100)
+                        player.blockX + Random.nextInt(-50, 50),
+                        Random.nextInt(76, 200),
+                        player.blockZ + Random.nextInt(-50, 50)
                     ).filledSpherePositionSet(Random.nextInt(2, 10))) {
                         player.world.setBlockState(blockPos, Blocks.BEDROCK.defaultState)
                     }
@@ -101,6 +97,7 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
                 val player = this.source.playerOrThrow
                 player.inventory.clear()
                 player.giveItemStack(ItemStack(Items.COBWEB, 64))
+                player.giveItemStack(ItemStack(Items.PIG_SPAWN_EGG, 64))
                 player.isSpiderman = !player.isSpiderman
                 if (player.isSpiderman) {
 
@@ -150,7 +147,6 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
     override fun onInitializeClient() {
         // Client initialization
         EntityRendererRegistry.init()
-        GrappleKey.registerAll()
         GrappleModUtils.init()
         Speedlines.initClient()
         WebShooter.initClient()
@@ -159,9 +155,10 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
 
         ClientLifecycleEvents.CLIENT_STARTED.register {
             AbilityRenderer.abilities += Ability(WebShooter.webShooterKey, { it.isSpiderman }, { "Web Shooter" })
-            AbilityRenderer.abilities += Ability(MinecraftClient.getInstance().options.pickItemKey, {
-                return@Ability it.getWeb() != null && it.isSpiderman
-            }, { "Netzgröße" }, keyText = "Scroll"
+            AbilityRenderer.abilities += Ability(
+                MinecraftClient.getInstance().options.pickItemKey, {
+                    return@Ability it.getWeb() != null && it.isSpiderman
+                }, { "Netzgröße" }, keyText = "Scroll"
             )
             AbilityRenderer.abilities += Ability(
                 MinecraftClient.getInstance().options.pickItemKey,
@@ -208,7 +205,6 @@ object Manager : ModInitializer, DedicatedServerModInitializer, ClientModInitial
             }, { "Absprung" }, prefix = "2x ".literal
             )
         }
-
     }
 
     override fun onInitializeServer() {

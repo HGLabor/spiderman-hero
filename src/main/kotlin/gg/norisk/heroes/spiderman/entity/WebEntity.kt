@@ -137,7 +137,6 @@ class WebEntity : ThrownItemEntity {
 
     override fun onCollision(hitResult: HitResult) {
         super.onCollision(hitResult)
-        println("Hit Result: ${hitResult.type} ${hitResult.pos}")
         if (hitResult is EntityHitResult) {
         } else {
             isCollided = true
